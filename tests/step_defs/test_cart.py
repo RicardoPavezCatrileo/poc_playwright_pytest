@@ -16,7 +16,7 @@ def cart_badge(inventory_page, cantidad):
 
 @then("el carrito contiene los productos:")
 def cart_contains(cart_page, datatable):
-    expected = [row[0] for row in datatable]
+    expected = [row[0] for row in datatable[1:]]  # la primera fila es el encabezado
     expect(cart_page.item_names).to_have_text(expected)
 
 

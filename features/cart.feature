@@ -15,6 +15,7 @@ Característica: Carrito de compras
     Entonces el contador del carrito muestra "2"
     Cuando voy al carrito
     Entonces el carrito contiene los productos:
+      | producto              |
       | Sauce Labs Backpack   |
       | Sauce Labs Bike Light |
 
