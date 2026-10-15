@@ -29,7 +29,7 @@ Para ver la ejecución: `-D headed=true -D slowmo=500` (behave) o `--headed --sl
 ## 2. Revisar la evidencia
 
 - Consola: step que falló, valor esperado y obtenido.
-- Screenshot: `test-results/behave/<escenario>/screenshot.png` o la carpeta de pytest en `test-results/`.
+- Screenshot: `test-results/behave/<escenario>/screenshot.png` o `test-results/pytest/<test>/`.
 - Trace: `.venv/Scripts/playwright show-trace <carpeta>/trace.zip` (DOM antes/después, red, acciones).
 
 ## 3. Clasificar la causa (una principal)

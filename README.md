@@ -38,6 +38,8 @@ behave --format progress                 # salida compacta
 
 Configuración por defecto en `behave.ini`. Ante una falla se guardan screenshot y trace en `test-results/behave/<escenario>/`.
 
+Cada caso deja un log de ejecución en `test-results/logs/<YYYYMMDD>/POC_SAUCEDEMO_<BROWSER>_<QA_ID>_<YYYYMMDD>.log`, con el bloque `[Setup]`, cada step con su resultado y duración, y el cierre `PRUEBA FINALIZADA` con la tabla de steps. Si el caso se ejecuta varias veces en el día, se agrega al mismo archivo (lo genera `features/execution_log.py`).
+
 ## Ejecución con pytest-bdd
 
 ```powershell
@@ -49,10 +51,10 @@ pytest -k "complete_purchase"            # un escenario (nombre del escenario en
 pytest --browser firefox                 # otro navegador (requiere playwright install firefox)
 ```
 
-Ante una falla se guardan screenshot y trace en `test-results/`. Para ver el trace:
+Ante una falla se guardan screenshot y trace en `test-results/pytest/` (pytest-playwright vacía esa carpeta al iniciar cada ejecución). Para ver el trace:
 
 ```powershell
-playwright show-trace test-results/<carpeta>/trace.zip
+playwright show-trace test-results/pytest/<carpeta>/trace.zip
 ```
 
 ## Estructura
@@ -70,14 +72,17 @@ Los steps existen en dos implementaciones (behave y pytest-bdd) con las mismas f
 
 ## Cobertura
 
-| Feature   | Escenarios |
-|-----------|------------|
-| QA0001_login_success | QA_0001 login exitoso |
-| QA0002_login_errors  | QA_0002_01 usuario bloqueado, _02 credenciales inválidas, _03 usuario vacío, _04 contraseña vacía, _05 ambos vacíos |
-| QA0003_logout        | QA_0003 cerrar sesión |
-| inventory | 6 productos visibles, ordenamiento por nombre y precio (4 variantes) |
-| cart      | agregar varios productos, quitar producto |
-| checkout  | compra completa con validación de total, campos obligatorios (3 variantes) |
+| Feature | Caso de prueba |
+|---|---|
+| `QA0001_login_success` | QA_0001 login exitoso |
+| `QA0002_login_errors` | QA_0002_01 usuario bloqueado · _02 credenciales inválidas · _03 usuario vacío · _04 contraseña vacía · _05 ambos vacíos |
+| `QA0003_logout` | QA_0003 cerrar sesión |
+| `QA0004_catalog_products` | QA_0004 se ven los 6 productos |
+| `QA0005_sort_products` | QA_0005_01 nombre A-Z · _02 nombre Z-A · _03 precio ascendente · _04 precio descendente |
+| `QA0006_cart_add_products` | QA_0006 agregar varios productos al carrito |
+| `QA0007_cart_remove_product` | QA_0007 quitar un producto del carrito |
+| `QA0008_checkout_complete_purchase` | QA_0008 compra completa con total y confirmación |
+| `QA0009_checkout_required_fields` | QA_0009_01 nombre · _02 apellido · _03 código postal obligatorios |
 
 ## VS Code
 

@@ -20,7 +20,7 @@ Usar el intérprete del venv (`.venv/Scripts/python`); las dependencias están f
 
 Todo tag nuevo de Gherkin debe registrarse en `markers` dentro de `pytest.ini`.
 
-Ante una falla, ambos runners guardan screenshot y trace de Playwright en `test-results/` (behave: `test-results/behave/<escenario>/`); se abre con `.venv/Scripts/playwright show-trace <ruta>/trace.zip`.
+Ante una falla, behave guarda screenshot y trace en `test-results/behave/<escenario>/` y pytest en `test-results/pytest/` (pytest-playwright vacía su carpeta `--output` al iniciar; por eso no debe apuntar a `test-results/` o borra la evidencia de behave); se abre con `.venv/Scripts/playwright show-trace <ruta>/trace.zip`.
 
 La URL base y la contraseña vienen del `.env` vía `settings.py` (ambos runners lo importan; si falta una variable se lanza un error al importar). El `.env` está en `.gitignore` — nunca subirlo al repo; toda variable nueva se agrega también a `.env.example`. En la línea de comandos, `--base-url` / `-D base_url=` tienen prioridad sobre el valor del `.env`.
 
@@ -31,6 +31,7 @@ Compartido por ambos runners: `features/*.feature` y `pages/` (Page Objects con 
 El ciclo de vida de Playwright también está duplicado: behave crea browser/context/page y las instancias de los Page Objects sobre `context` en `features/environment.py`; pytest-bdd los obtiene de los fixtures de pytest-playwright más los fixtures de Page Objects en `tests/conftest.py`. Un Page Object nuevo debe exportarse en `pages/__init__.py` y conectarse en ambos lados.
 
 Lado behave:
+- `features/execution_log.py` — log por caso en `test-results/logs/<YYYYMMDD>/`, conectado desde los hooks de `environment.py` (`before_scenario`, `before_step`, `after_step`, `after_scenario`); usa el logger `saucedemo` sin propagar para que behave no lo capture.
 - `features/steps/saucedemo_steps.py` — todos los steps (en behave los steps son globales). Los valores vacíos de `Examples` usan el tipo de parseo personalizado `{x:Text}`.
 - Las tablas de datos necesitan fila de encabezado (behave toma la fila 1 como encabezados; el step de pytest-bdd la salta con `datatable[1:]`).
 

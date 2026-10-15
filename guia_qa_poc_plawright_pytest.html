@@ -397,7 +397,8 @@
       <div class="card">
         <span class="icon">📸</span>
         <h3>Evidencia automática al fallar</h3>
-        <p>Cada escenario fallido deja screenshot y trace de Playwright en <code>test-results/</code>.
+        <p>Cada escenario fallido deja screenshot y trace de Playwright en <code>test-results/behave/</code> o
+          <code>test-results/pytest/</code>.
           El trace permite revisar paso a paso qué vio el navegador.</p>
       </div>
       <div class="card">
@@ -446,7 +447,7 @@
         <!-- Capa 2: features -->
         <rect x="20" y="106" width="840" height="64" rx="10" fill="#e0f0e7" stroke="#2a9d6a" stroke-width="2"/>
         <text x="40" y="135" font-size="14" font-weight="700" fill="#0d5d3a" font-family="Inter,sans-serif">📋 features/*.feature · compartido</text>
-        <text x="40" y="155" font-size="13" fill="#2c3530" font-family="Inter,sans-serif">6 features · 18 escenarios · IDs QA_0001–QA_0009 · tags @login @inventory @cart @checkout @smoke</text>
+        <text x="40" y="155" font-size="13" fill="#2c3530" font-family="Inter,sans-serif">9 features (uno por caso) · 18 escenarios · IDs QA_0001–QA_0009 · tags @login @inventory @cart @checkout @smoke</text>
 
         <!-- Capa 3: runners -->
         <rect x="20" y="196" width="410" height="92" rx="10" fill="#f7efde" stroke="#c9a86a" stroke-width="2"/>
@@ -494,7 +495,7 @@
 <section id="cobertura">
   <div class="container">
     <span class="kicker">04 · La cobertura</span>
-    <h2>Los 6 features y el tag transversal @smoke</h2>
+    <h2>Los 9 casos de prueba y el tag transversal @smoke</h2>
     <p class="lead">18 escenarios que recorren el flujo completo de compra de Sauce Demo, más los errores
       de validación más comunes. Cada feature tiene su tag, y <code>@smoke</code> marca el camino crítico.</p>
 
@@ -510,22 +511,25 @@
       <div class="test-card api">
         <span class="badge">@inventory</span>
         <h3>🛍️ Catálogo</h3>
-        <p><strong>5 escenarios.</strong> Se ven los 6 productos, y el orden por nombre (A-Z, Z-A) y por
+        <p><strong>5 escenarios en 2 features.</strong> <code>QA0004_catalog_products</code>: se ven los 6
+          productos. <code>QA0005_sort_products</code>: QA_0005_01 a _04, orden por nombre (A-Z, Z-A) y por
           precio (ascendente, descendente).</p>
         <p class="ex">El orden se verifica leyendo la página, no contra una lista fija.</p>
       </div>
       <div class="test-card data">
         <span class="badge">@cart</span>
         <h3>🛒 Carrito</h3>
-        <p><strong>2 escenarios.</strong> Agregar dos productos (badge en "2" y ambos en el carrito) y
-          quitar un producto.</p>
+        <p><strong>2 escenarios en 2 features.</strong> <code>QA0006_cart_add_products</code>: agregar dos
+          productos (badge en "2" y ambos en el carrito). <code>QA0007_cart_remove_product</code>: quitar un
+          producto.</p>
         <p class="ex">Usa una tabla de datos con fila de encabezado.</p>
       </div>
       <div class="test-card perf">
         <span class="badge">@checkout</span>
         <h3>💳 Checkout</h3>
-        <p><strong>4 escenarios.</strong> Compra completa con total <code>$32.39</code> y mensaje de
-          confirmación; nombre, apellido y código postal obligatorios.</p>
+        <p><strong>4 escenarios en 2 features.</strong> <code>QA0008_checkout_complete_purchase</code>: compra
+          completa con total <code>$32.39</code> y confirmación. <code>QA0009_checkout_required_fields</code>:
+          QA_0009_01 a _03, nombre, apellido y código postal obligatorios.</p>
         <p class="ex">El Background deja un producto en el carrito.</p>
       </div>
 
@@ -610,7 +614,7 @@
         <!-- Si falla -->
         <rect x="20" y="236" width="900" height="74" rx="10" fill="#fbe6dd" stroke="#d97757" stroke-width="2"/>
         <text x="470" y="262" text-anchor="middle" font-size="12.5" font-weight="700" fill="#8c2d20" font-family="Inter,sans-serif">📸 Si un escenario falla: screenshot + trace en test-results/</text>
-        <text x="470" y="282" text-anchor="middle" font-size="11.5" fill="#8c2d20" font-family="Inter,sans-serif">behave guarda una carpeta por escenario en test-results/behave/; pytest-bdd lo hace con --screenshot only-on-failure y --tracing retain-on-failure.</text>
+        <text x="470" y="282" text-anchor="middle" font-size="11.5" fill="#8c2d20" font-family="Inter,sans-serif">behave guarda una carpeta por escenario en test-results/behave/; pytest-bdd en test-results/pytest/ (con --screenshot only-on-failure y --tracing retain-on-failure).</text>
         <text x="470" y="298" text-anchor="middle" font-size="11.5" fill="#8c2d20" font-family="Inter,sans-serif">El trace se abre con: playwright show-trace &lt;carpeta&gt;/trace.zip</text>
       </svg>
       <p class="diagram-caption">Lo que hace el QA: escribir el escenario, implementarlo en los dos runners y confirmar que <strong>las dos suites</strong> pasan antes de subir el cambio.</p>
@@ -717,14 +721,14 @@
       <div class="step">
         <div>
           <h3>Mirar el screenshot</h3>
-          <p>Está en <code>test-results/</code> (behave: <code>test-results/behave/&lt;escenario&gt;/screenshot.png</code>).
+          <p>behave: <code>test-results/behave/&lt;escenario&gt;/screenshot.png</code>; pytest: <code>test-results/pytest/&lt;test&gt;/</code>.
             Muestra cómo estaba la página en el momento de la falla.</p>
         </div>
       </div>
       <div class="step">
         <div>
           <h3>Abrir el trace</h3>
-          <p><code>playwright show-trace test-results/&lt;carpeta&gt;/trace.zip</code> permite recorrer
+          <p><code>playwright show-trace &lt;carpeta del escenario&gt;/trace.zip</code> permite recorrer
             cada acción, ver el DOM antes y después, y la red. Para verlo en vivo, ejecutar el escenario
             con el navegador visible y <code>slowmo</code>.</p>
         </div>
@@ -819,7 +823,7 @@ pytest</pre>
       <table>
         <thead><tr><th>Capacidad</th><th>Estado</th><th>Detalle</th></tr></thead>
         <tbody>
-          <tr><td>Suite behave</td><td><span class="badge">18/18 VERDE</span></td><td class="n">6 features · 18 escenarios · 75 steps · ≈8 s</td></tr>
+          <tr><td>Suite behave</td><td><span class="badge">18/18 VERDE</span></td><td class="n">9 features · 18 escenarios · 75 steps · ≈8 s</td></tr>
           <tr><td>Suite pytest-bdd</td><td><span class="badge">18/18 VERDE</span></td><td class="n">Los mismos 18 escenarios · ≈16 s</td></tr>
           <tr><td>Evidencia ante fallas</td><td><span class="badge">LISTO</span></td><td>Screenshot y trace en los dos runners</td></tr>
           <tr><td>Configuración por <code>.env</code></td><td><span class="badge">LISTO</span></td><td>URL y contraseña fuera del código</td></tr>
@@ -863,7 +867,7 @@ pytest</pre>
       <div class="card">
         <span class="icon">📋</span>
         <h3>features/</h3>
-        <p>Los seis <code>.feature</code>. Son la mejor documentación funcional de lo que se prueba.</p>
+        <p>Los nueve <code>.feature</code>, uno por caso de prueba (<code>QA0001</code> a <code>QA0009</code>). Son la mejor documentación funcional de lo que se prueba.</p>
       </div>
       <div class="card">
         <span class="icon">⚙️</span>

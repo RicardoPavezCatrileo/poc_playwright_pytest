@@ -7,9 +7,12 @@ from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))  # para importar pages/ al ejecutar el script `behave`
+sys.path.insert(0, str(ROOT / "features"))  # para importar execution_log
 
 import settings  # noqa: E402
 from pages import CartPage, CheckoutPage, InventoryPage, LoginPage  # noqa: E402
+
+import execution_log  # noqa: E402
 
 RESULTS_DIR = ROOT / "test-results" / "behave"
 
@@ -36,9 +39,19 @@ def before_scenario(context, scenario):
     context.inventory_page = InventoryPage(context.page)
     context.cart_page = CartPage(context.page)
     context.checkout_page = CheckoutPage(context.page)
+    execution_log.start_scenario(context, scenario)
+
+
+def before_step(context, step):
+    execution_log.start_step(context, step)
+
+
+def after_step(context, step):
+    execution_log.end_step(context, step)
 
 
 def after_scenario(context, scenario):
+    out = None
     if scenario.status == "failed":
         out = RESULTS_DIR / re.sub(r"[^\w-]+", "_", scenario.name).strip("_")
         out.mkdir(parents=True, exist_ok=True)
@@ -47,6 +60,7 @@ def after_scenario(context, scenario):
     else:
         context.browser_context.tracing.stop()
     context.browser_context.close()
+    execution_log.finish_scenario(context, scenario, evidence=out)
 
 
 def after_all(context):

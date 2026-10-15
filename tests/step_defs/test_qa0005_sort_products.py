@@ -1,7 +1,6 @@
-from playwright.sync_api import expect
 from pytest_bdd import parsers, scenarios, then, when
 
-scenarios("inventory.feature")
+scenarios("QA0005_sort_products.feature")
 
 SORT_RULES = {
     "Name (A to Z)": ("names", False),
@@ -9,11 +8,6 @@ SORT_RULES = {
     "Price (low to high)": ("prices", False),
     "Price (high to low)": ("prices", True),
 }
-
-
-@then(parsers.parse("I see {count:d} products in the catalog"))
-def product_count(inventory_page, count):
-    expect(inventory_page.items).to_have_count(count)
 
 
 @when(parsers.parse('I sort the products by "{order}"'))

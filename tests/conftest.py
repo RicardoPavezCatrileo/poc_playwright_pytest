@@ -70,6 +70,24 @@ def go_to_cart(inventory_page):
     inventory_page.go_to_cart()
 
 
+@given("I start the checkout")
+def start_checkout(cart_page):
+    cart_page.checkout()
+
+
+@when(parsers.re(
+    r'I enter first name "(?P<first_name>[^"]*)", last name "(?P<last_name>[^"]*)"'
+    r' and postal code "(?P<postal_code>[^"]*)"'
+))
+def fill_info(checkout_page, first_name, last_name, postal_code):
+    checkout_page.fill_info(first_name, last_name, postal_code)
+
+
+@when("I continue to the order overview")
+def continue_to_overview(checkout_page):
+    checkout_page.continue_to_overview()
+
+
 # Los valores pueden venir vacíos desde Examples, por eso se usa regex con [^"]*
 @then(parsers.re(r'I see the error message "(?P<message>[^"]*)"'))
 def error_message(page, message):
