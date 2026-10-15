@@ -11,31 +11,23 @@ BDD end-to-end POC against https://www.saucedemo.com using Playwright (sync API,
 Use the venv interpreter (`.venv/Scripts/python`); dependencies are pinned in `requirements.txt`.
 
 ```
-.venv/Scripts/behave                                    # full suite (behave)
-.venv/Scripts/behave --tags=smoke                       # by tag
 .venv/Scripts/behave -n "Complete purchase"             # single scenario by name
 .venv/Scripts/behave -D headed=true -D slowmo=500       # watch the browser; userdata defaults in behave.ini
-.venv/Scripts/python -m pytest                          # full suite (pytest-bdd)
-.venv/Scripts/python -m pytest -m smoke                 # Gherkin tags become pytest markers
 .venv/Scripts/python -m pytest -k "complete_purchase"   # single scenario (scenario name, snake_case)
-.venv/Scripts/python -m pytest --headed --slowmo 500    # watch the browser
 ```
 
-`pytest.ini` already sets `--base-url`, chromium, and screenshot/trace on failure into `test-results/`. Any new Gherkin tag must be registered under `markers` in `pytest.ini`.
+Any new Gherkin tag must be registered under `markers` in `pytest.ini`.
 
 ## Architecture
 
 Shared by both runners: `features/*.feature` and `pages/`. Step implementations are **duplicated** with identical phrases — any step added or reworded in a feature must be implemented in both `features/steps/saucedemo_steps.py` (behave) and `tests/` (pytest-bdd). Run both suites after changes.
 
 behave side:
-- `features/environment.py` — starts Playwright in `before_all`, creates a fresh browser context + page + Page Objects on `context` per scenario, saves screenshot/trace to `test-results/behave/` on failure.
 - `features/steps/saucedemo_steps.py` — all steps (behave steps are global). Empty `Examples` values use the custom `{x:Text}` parse type.
 - Data tables need a header row (behave treats row 1 as headings; pytest-bdd step skips it with `datatable[1:]`).
 
 pytest-bdd side:
-- `bdd_features_base_dir = features/`, so step modules call `scenarios("login.feature")` with paths relative to that folder.
-- `tests/step_defs/test_<feature>.py` — one module per feature: binds the feature and defines steps only that feature uses.
-- `tests/conftest.py` — Page Object fixtures (`login_page`, `inventory_page`, `cart_page`, `checkout_page`) and steps shared across features (login as user, add to cart, go to cart, error message). Put a step here as soon as a second feature needs it.
+- Steps shared across features live in `tests/conftest.py`; put a step there as soon as a second feature needs it.
 - `pages/` — Page Objects holding locators and actions; assertions (`expect`) live in steps, not in pages.
 
 Conventions that are easy to break:
@@ -43,5 +35,3 @@ Conventions that are easy to break:
 - A session-scoped autouse fixture sets Playwright's test-id attribute to `data-test`, so locators use `page.get_by_test_id("<data-test value>")`. Prefer that over CSS.
 - pytest-bdd matches step type: a step used after `Given` in `Background` and after `When` in a scenario needs both `@given` and `@when` stacked on the same function.
 - When an `Examples` value can be empty, use `parsers.re` with `[^"]*` instead of `parsers.parse` (`{x}` needs at least one char).
-- Product add/remove buttons are located by slug (`add-to-cart-sauce-labs-backpack`); see `product_slug` in `pages/inventory_page.py`.
-- Shared password for all saucedemo users is `secret_sauce` (`PASSWORD` in `tests/conftest.py`).
