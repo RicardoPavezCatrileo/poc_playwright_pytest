@@ -8,10 +8,10 @@ Feature: Product catalog
     Given I am logged in as "standard_user"
 
   @smoke
-  Scenario: The catalog shows all products
+  Scenario: QA_0004 The catalog shows all products
     Then I see 6 products in the catalog
 
-  Scenario Outline: Sort products
+  Scenario Outline: QA_0005 Sort products
     When I sort the products by "<order>"
     Then the products are sorted by "<order>"
 

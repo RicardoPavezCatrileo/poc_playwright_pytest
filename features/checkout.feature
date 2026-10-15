@@ -11,14 +11,14 @@ Feature: Checkout
     And I start the checkout
 
   @smoke
-  Scenario: Complete purchase of one product
+  Scenario: QA_0008 Complete purchase of one product
     When I enter first name "Ricardo", last name "Pavez" and postal code "8320000"
     And I continue to the order overview
     Then the order total is "$32.39"
     When I finish the purchase
     Then I see the confirmation message "Thank you for your order!"
 
-  Scenario Outline: Shipping information is required
+  Scenario Outline: QA_0009 Shipping information is required
     When I enter first name "<first_name>", last name "<last_name>" and postal code "<postal_code>"
     And I continue to the order overview
     Then I see the error message "<message>"

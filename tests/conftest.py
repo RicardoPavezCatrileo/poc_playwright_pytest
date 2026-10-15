@@ -39,6 +39,17 @@ def checkout_page(page):
     return CheckoutPage(page)
 
 
+@given("I am on the login page")
+def open_login(login_page):
+    login_page.open()
+
+
+# Los valores pueden venir vacíos desde Examples, por eso se usa regex con [^"]*
+@when(parsers.re(r'I log in with username "(?P<username>[^"]*)" and password "(?P<password>[^"]*)"'))
+def do_login(login_page, username, password):
+    login_page.login(username, password)
+
+
 @given(parsers.parse('I am logged in as "{username}"'))
 def logged_in_as(login_page, inventory_page, username):
     login_page.open()

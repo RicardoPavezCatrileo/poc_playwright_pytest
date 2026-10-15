@@ -41,6 +41,7 @@ Lado pytest-bdd:
 Convenciones fáciles de romper:
 
 - El atributo test-id de Playwright está configurado como `data-test` (pytest: fixture autouse de sesión; behave: `before_all`), por eso los localizadores usan `page.get_by_test_id("<valor de data-test>")`. Preferirlo sobre CSS.
+- Cada `Scenario` / `Scenario Outline` empieza con un ID correlativo global: `QA_0001 Successful login ...`. Un escenario nuevo toma el siguiente número libre (buscar el mayor con `grep -o "QA_[0-9]*" features/*.feature`); los IDs no se reutilizan ni se renumeran. En un `Scenario Outline` cada fila es un caso propio: columna `case` (`01`, `02`…) en `Examples` y nombre `QA_NNNN_<case> ...` (ver `features/QA0002_login_errors.feature`). Los features nuevos se nombran `QANNNN_<nombre>.feature` con el ID de su escenario, y su módulo pytest `tests/step_defs/test_qannnn_<nombre>.py`. El ID queda en los nombres de pytest (`test_qa_0001_...`) y se filtra con `behave -n "QA_0001"` o `pytest -k qa_0001`.
 - `I am logged in as "<user>"` solo indica el usuario; el step toma la contraseña real de `settings.PASSWORD`, así que no ponerla en los features.
 - pytest-bdd distingue el tipo de step: un step usado después de `Given` en un `Background` y después de `When` en un escenario necesita `@given` y `@when` apilados sobre la misma función.
 - Cuando un valor de `Examples` puede venir vacío, usar `parsers.re` con `[^"]*` en vez de `parsers.parse` (`{x}` necesita al menos un carácter).

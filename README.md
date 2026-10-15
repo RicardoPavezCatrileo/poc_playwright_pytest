@@ -29,7 +29,7 @@ Las variables de entorno del sistema tienen prioridad sobre el `.env` (útil en 
 ```powershell
 behave                                   # todo (headless, chromium)
 behave --tags=smoke                      # por tag (@smoke, @login, @cart, ...)
-behave features/login.feature            # una feature
+behave features/QA0001_login_success.feature  # una feature
 behave -n "Complete purchase"            # un escenario por nombre
 behave -D headed=true -D slowmo=500      # ver el navegador
 behave -D browser=firefox                # otro navegador (requiere playwright install firefox)
@@ -44,7 +44,7 @@ Configuración por defecto en `behave.ini`. Ante una falla se guardan screenshot
 pytest                                   # todo (headless, chromium)
 pytest --headed --slowmo 500             # ver el navegador
 pytest -m smoke                          # por tag de Gherkin (@smoke, @login, @cart, ...)
-pytest tests/step_defs/test_login.py     # una feature
+pytest tests/step_defs/test_qa0001_login_success.py  # una feature
 pytest -k "complete_purchase"            # un escenario (nombre del escenario en snake_case)
 pytest --browser firefox                 # otro navegador (requiere playwright install firefox)
 ```
@@ -72,7 +72,9 @@ Los steps existen en dos implementaciones (behave y pytest-bdd) con las mismas f
 
 | Feature   | Escenarios |
 |-----------|------------|
-| login     | login exitoso, usuario bloqueado, credenciales inválidas, campos vacíos, logout |
+| QA0001_login_success | QA_0001 login exitoso |
+| QA0002_login_errors  | QA_0002_01 usuario bloqueado, _02 credenciales inválidas, _03 usuario vacío, _04 contraseña vacía, _05 ambos vacíos |
+| QA0003_logout        | QA_0003 cerrar sesión |
 | inventory | 6 productos visibles, ordenamiento por nombre y precio (4 variantes) |
 | cart      | agregar varios productos, quitar producto |
 | checkout  | compra completa con validación de total, campos obligatorios (3 variantes) |

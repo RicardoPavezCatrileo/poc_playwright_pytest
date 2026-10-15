@@ -11,6 +11,15 @@ solo está terminado cuando las dos suites pasan.
 ## 1. Escribir o editar el `.feature`
 
 - Archivo en `features/<feature>.feature`. Keywords **y** texto de los steps en **inglés**.
+- **ID obligatorio:** el nombre de cada `Scenario` / `Scenario Outline` empieza con `QA_NNNN`
+  (ej. `Scenario: QA_0010 Add product from detail page`). El número es correlativo global entre
+  todos los features: tomar el mayor existente (`grep -o "QA_[0-9]*" features/*.feature`) y sumar 1.
+  Nunca reutilizar ni renumerar un ID existente, aunque se borre o mueva el escenario.
+- **Scenario Outline:** cada fila es un caso con ID propio. Agregar la columna `case` (`01`, `02`…)
+  como primera columna de `Examples` y nombrar el outline `QA_NNNN_<case> ...`
+  (resultado: `QA_0002_01`, `QA_0002_02`…). Ejemplo: `features/QA0002_login_errors.feature`.
+- **Feature nuevo:** archivo `features/QANNNN_<nombre>.feature`, con el ID de su escenario, y módulo
+  pytest `tests/step_defs/test_qannnn_<nombre>.py` (en minúscula).
 - Antes de escribir una frase nueva, buscar si ya existe un step que sirva:
   `grep -n "@given\|@when\|@then\|@step" features/steps/saucedemo_steps.py`.
   Reutilizar una frase existente evita implementar dos steps nuevos.

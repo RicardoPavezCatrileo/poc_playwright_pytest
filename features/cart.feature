@@ -8,7 +8,7 @@ Feature: Shopping cart
     Given I am logged in as "standard_user"
 
   @smoke
-  Scenario: Add several products to the cart
+  Scenario: QA_0006 Add several products to the cart
     When I add the product "Sauce Labs Backpack" to the cart
     And I add the product "Sauce Labs Bike Light" to the cart
     Then the cart badge shows "2"
@@ -18,7 +18,7 @@ Feature: Shopping cart
       | Sauce Labs Backpack   |
       | Sauce Labs Bike Light |
 
-  Scenario: Remove a product from the cart
+  Scenario: QA_0007 Remove a product from the cart
     When I add the product "Sauce Labs Backpack" to the cart
     And I remove the product "Sauce Labs Backpack" from the cart
     Then the cart is empty
