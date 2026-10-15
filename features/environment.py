@@ -8,6 +8,7 @@ from playwright.sync_api import sync_playwright
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))  # para importar pages/ al ejecutar el script `behave`
 
+import settings  # noqa: E402
 from pages import CartPage, CheckoutPage, InventoryPage, LoginPage  # noqa: E402
 
 RESULTS_DIR = ROOT / "test-results" / "behave"
@@ -15,7 +16,8 @@ RESULTS_DIR = ROOT / "test-results" / "behave"
 
 def before_all(context):
     userdata = context.config.userdata
-    context.base_url = userdata.get("base_url")
+    # La URL viene del .env; -D base_url=... en la línea de comandos tiene prioridad
+    context.base_url = userdata.get("base_url") or settings.BASE_URL
     context.playwright = sync_playwright().start()
     # saucedemo usa data-test (no data-testid) -> get_by_test_id apunta a ese atributo
     context.playwright.selectors.set_test_id_attribute("data-test")

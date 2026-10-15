@@ -18,6 +18,8 @@ Use the venv interpreter (`.venv/Scripts/python`); dependencies are pinned in `r
 
 Any new Gherkin tag must be registered under `markers` in `pytest.ini`.
 
+Base URL and password come from `.env` via `settings.py` (both runners import it; missing vars raise at import). `.env` is gitignored — never commit it; add new variables to `.env.example` too. CLI `--base-url` / `-D base_url=` override the `.env` value.
+
 ## Architecture
 
 Shared by both runners: `features/*.feature` and `pages/`. Step implementations are **duplicated** with identical phrases — any step added or reworded in a feature must be implemented in both `features/steps/saucedemo_steps.py` (behave) and `tests/` (pytest-bdd). Run both suites after changes.

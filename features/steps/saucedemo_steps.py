@@ -8,7 +8,8 @@ import parse
 from behave import given, register_type, step, then, when
 from playwright.sync_api import expect
 
-PASSWORD = "secret_sauce"
+import settings
+
 SORT_RULES = {
     "Name (A to Z)": ("names", False),
     "Name (Z to A)": ("names", True),
@@ -31,7 +32,7 @@ register_type(Text=parse_text)
 @given('I am logged in as "{username}"')
 def logged_in_as(context, username):
     context.login_page.open()
-    context.login_page.login(username, PASSWORD)
+    context.login_page.login(username, settings.PASSWORD)
     expect(context.inventory_page.title).to_have_text("Products")
 
 

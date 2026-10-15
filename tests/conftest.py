@@ -3,9 +3,14 @@ import pytest
 from playwright.sync_api import expect
 from pytest_bdd import given, parsers, then, when
 
+import settings
 from pages import CartPage, CheckoutPage, InventoryPage, LoginPage
 
-PASSWORD = "secret_sauce"
+
+def pytest_configure(config):
+    # La URL viene del .env; un --base-url en la línea de comandos tiene prioridad
+    if not config.option.base_url:
+        config.option.base_url = settings.BASE_URL
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -37,7 +42,7 @@ def checkout_page(page):
 @given(parsers.parse('I am logged in as "{username}"'))
 def logged_in_as(login_page, inventory_page, username):
     login_page.open()
-    login_page.login(username, PASSWORD)
+    login_page.login(username, settings.PASSWORD)
     expect(inventory_page.title).to_have_text("Products")
 
 

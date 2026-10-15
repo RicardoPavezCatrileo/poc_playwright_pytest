@@ -10,7 +10,19 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 playwright install chromium
+copy .env.example .env      # y completar SAUCE_PASSWORD
 ```
+
+## Configuración (.env)
+
+La URL del sitio y la contraseña se leen del archivo `.env` (vía `settings.py`), que **no se sube al repo** (está en `.gitignore`). `.env.example` es la plantilla con los nombres de las variables:
+
+| Variable | Uso |
+|---|---|
+| `SAUCE_BASE_URL` | URL base del sitio (los Page Objects navegan con rutas relativas, ej. `/`) |
+| `SAUCE_PASSWORD` | contraseña para los steps `I am logged in as "<usuario>"` |
+
+Las variables de entorno del sistema tienen prioridad sobre el `.env` (útil en CI con secrets). La URL también se puede cambiar por ejecución con `pytest --base-url <url>` o `behave -D base_url=<url>`.
 
 ## Ejecución con behave
 
