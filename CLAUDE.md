@@ -14,7 +14,7 @@ Usar el intérprete del venv (`.venv/Scripts/python`); las dependencias están f
 .venv/Scripts/behave                                    # suite completa con behave
 .venv/Scripts/python -m pytest                          # suite completa con pytest-bdd
 .venv/Scripts/behave -n "Complete purchase"             # un escenario por nombre
-.venv/Scripts/behave -D headed=true -D slowmo=500       # ver el navegador; valores por defecto en behave.ini
+.venv/Scripts/behave -D headed=false                    # sin navegador visible (behave.ini trae headed = true)
 .venv/Scripts/python -m pytest -k "complete_purchase"   # un escenario (nombre del escenario en snake_case)
 ```
 

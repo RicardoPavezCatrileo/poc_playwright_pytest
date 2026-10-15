@@ -27,11 +27,12 @@ Las variables de entorno del sistema tienen prioridad sobre el `.env` (útil en 
 ## Ejecución con behave
 
 ```powershell
-behave                                   # todo (headless, chromium)
+behave                                   # todo (navegador visible, chromium)
 behave --tags=smoke                      # por tag (@smoke, @login, @cart, ...)
 behave features/QA0001_login_success.feature  # una feature
 behave -n "Complete purchase"            # un escenario por nombre
-behave -D headed=true -D slowmo=500      # ver el navegador
+behave -D headed=false                   # sin ver el navegador (más rápido, para CI)
+behave -D slowmo=500                     # cámara lenta
 behave -D browser=firefox                # otro navegador (requiere playwright install firefox)
 behave --format progress                 # salida compacta
 ```
