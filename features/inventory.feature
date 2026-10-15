@@ -1,23 +1,22 @@
-# language: es
 @inventory
-Característica: Catálogo de productos
-  Como cliente autenticado
-  Quiero ver y ordenar el catálogo
-  Para encontrar fácilmente lo que busco
+Feature: Product catalog
+  As a logged-in customer
+  I want to view and sort the catalog
+  So that I can easily find what I am looking for
 
-  Antecedentes:
-    Dado que inicié sesión como "standard_user"
+  Background:
+    Given I am logged in as "standard_user"
 
   @smoke
-  Escenario: El catálogo muestra todos los productos
-    Entonces veo 6 productos en el catálogo
+  Scenario: The catalog shows all products
+    Then I see 6 products in the catalog
 
-  Esquema del escenario: Ordenar productos
-    Cuando ordeno los productos por "<orden>"
-    Entonces los productos quedan ordenados por "<orden>"
+  Scenario Outline: Sort products
+    When I sort the products by "<order>"
+    Then the products are sorted by "<order>"
 
-    Ejemplos:
-      | orden               |
+    Examples:
+      | order               |
       | Name (A to Z)       |
       | Name (Z to A)       |
       | Price (low to high) |

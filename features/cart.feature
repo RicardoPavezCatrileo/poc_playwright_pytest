@@ -1,25 +1,24 @@
-# language: es
 @cart
-Característica: Carrito de compras
-  Como cliente autenticado
-  Quiero agregar y quitar productos del carrito
-  Para preparar mi compra
+Feature: Shopping cart
+  As a logged-in customer
+  I want to add and remove products from the cart
+  So that I can prepare my purchase
 
-  Antecedentes:
-    Dado que inicié sesión como "standard_user"
+  Background:
+    Given I am logged in as "standard_user"
 
   @smoke
-  Escenario: Agregar varios productos al carrito
-    Cuando agrego al carrito el producto "Sauce Labs Backpack"
-    Y agrego al carrito el producto "Sauce Labs Bike Light"
-    Entonces el contador del carrito muestra "2"
-    Cuando voy al carrito
-    Entonces el carrito contiene los productos:
-      | producto              |
+  Scenario: Add several products to the cart
+    When I add the product "Sauce Labs Backpack" to the cart
+    And I add the product "Sauce Labs Bike Light" to the cart
+    Then the cart badge shows "2"
+    When I go to the cart
+    Then the cart contains the products:
+      | product               |
       | Sauce Labs Backpack   |
       | Sauce Labs Bike Light |
 
-  Escenario: Quitar un producto del carrito
-    Cuando agrego al carrito el producto "Sauce Labs Backpack"
-    Y quito del carrito el producto "Sauce Labs Backpack"
-    Entonces el carrito está vacío
+  Scenario: Remove a product from the cart
+    When I add the product "Sauce Labs Backpack" to the cart
+    And I remove the product "Sauce Labs Backpack" from the cart
+    Then the cart is empty

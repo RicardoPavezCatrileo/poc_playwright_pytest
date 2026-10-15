@@ -17,136 +17,136 @@ SORT_RULES = {
 }
 
 
-# {x} de parse exige al menos un carácter; los Ejemplos tienen valores vacíos
+# {x} de parse exige al menos un carácter; los Examples tienen valores vacíos
 @parse.with_pattern(r'[^"]*')
-def parse_texto(text):
+def parse_text(text):
     return text
 
 
-register_type(Texto=parse_texto)
+register_type(Text=parse_text)
 
 
 # ---------- Compartidos ----------
 
-@given('que inicié sesión como "{usuario}"')
-def logged_in_as(context, usuario):
+@given('I am logged in as "{username}"')
+def logged_in_as(context, username):
     context.login_page.open()
-    context.login_page.login(usuario, PASSWORD)
+    context.login_page.login(username, PASSWORD)
     expect(context.inventory_page.title).to_have_text("Products")
 
 
-@step('agrego al carrito el producto "{producto}"')
-def add_to_cart(context, producto):
-    context.inventory_page.add_to_cart(producto)
+@step('I add the product "{product}" to the cart')
+def add_to_cart(context, product):
+    context.inventory_page.add_to_cart(product)
 
 
-@step("voy al carrito")
+@step("I go to the cart")
 def go_to_cart(context):
     context.inventory_page.go_to_cart()
 
 
-@then('veo el mensaje de error "{mensaje:Texto}"')
-def error_message(context, mensaje):
-    expect(context.page.get_by_test_id("error")).to_have_text(mensaje)
+@then('I see the error message "{message:Text}"')
+def error_message(context, message):
+    expect(context.page.get_by_test_id("error")).to_have_text(message)
 
 
 # ---------- Login ----------
 
-@given("que estoy en la página de login")
+@given("I am on the login page")
 def open_login(context):
     context.login_page.open()
 
 
-@when('inicio sesión con usuario "{usuario:Texto}" y contraseña "{clave:Texto}"')
-def do_login(context, usuario, clave):
-    context.login_page.login(usuario, clave)
+@when('I log in with username "{username:Text}" and password "{password:Text}"')
+def do_login(context, username, password):
+    context.login_page.login(username, password)
 
 
-@when("cierro sesión")
+@when("I log out")
 def logout(context):
     context.inventory_page.logout()
 
 
-@then("veo la página de productos")
+@then("I see the products page")
 def products_page(context):
     expect(context.page).to_have_url(re.compile(r"/inventory\.html$"))
     expect(context.inventory_page.title).to_have_text("Products")
 
 
-@then("vuelvo a la página de login")
+@then("I am back on the login page")
 def back_to_login(context):
     expect(context.login_page.login_button).to_be_visible()
 
 
 # ---------- Catálogo ----------
 
-@then("veo {cantidad:d} productos en el catálogo")
-def product_count(context, cantidad):
-    expect(context.inventory_page.items).to_have_count(cantidad)
+@then("I see {count:d} products in the catalog")
+def product_count(context, count):
+    expect(context.inventory_page.items).to_have_count(count)
 
 
-@when('ordeno los productos por "{orden}"')
-def sort_products(context, orden):
-    context.inventory_page.sort_by(orden)
+@when('I sort the products by "{order}"')
+def sort_products(context, order):
+    context.inventory_page.sort_by(order)
 
 
-@then('los productos quedan ordenados por "{orden}"')
-def products_sorted(context, orden):
-    field, reverse = SORT_RULES[orden]
+@then('the products are sorted by "{order}"')
+def products_sorted(context, order):
+    field, reverse = SORT_RULES[order]
     values = getattr(context.inventory_page, field)()
-    assert values == sorted(values, reverse=reverse), f"Orden incorrecto para '{orden}': {values}"
+    assert values == sorted(values, reverse=reverse), f"Orden incorrecto para '{order}': {values}"
 
 
 # ---------- Carrito ----------
 
-@when('quito del carrito el producto "{producto}"')
-def remove_from_cart(context, producto):
-    context.inventory_page.remove_from_cart(producto)
+@when('I remove the product "{product}" from the cart')
+def remove_from_cart(context, product):
+    context.inventory_page.remove_from_cart(product)
 
 
-@then('el contador del carrito muestra "{cantidad}"')
-def cart_badge(context, cantidad):
-    expect(context.inventory_page.cart_badge).to_have_text(cantidad)
+@then('the cart badge shows "{count}"')
+def cart_badge(context, count):
+    expect(context.inventory_page.cart_badge).to_have_text(count)
 
 
-@then("el carrito contiene los productos:")
+@then("the cart contains the products:")
 def cart_contains(context):
-    expected = [row["producto"] for row in context.table]
+    expected = [row["product"] for row in context.table]
     expect(context.cart_page.item_names).to_have_text(expected)
 
 
-@then("el carrito está vacío")
+@then("the cart is empty")
 def cart_empty(context):
     expect(context.inventory_page.cart_badge).to_have_count(0)
 
 
 # ---------- Checkout ----------
 
-@given("inicio el checkout")
+@given("I start the checkout")
 def start_checkout(context):
     context.cart_page.checkout()
 
 
-@when('ingreso nombre "{nombre:Texto}", apellido "{apellido:Texto}" y código postal "{cp:Texto}"')
-def fill_info(context, nombre, apellido, cp):
-    context.checkout_page.fill_info(nombre, apellido, cp)
+@when('I enter first name "{first_name:Text}", last name "{last_name:Text}" and postal code "{postal_code:Text}"')
+def fill_info(context, first_name, last_name, postal_code):
+    context.checkout_page.fill_info(first_name, last_name, postal_code)
 
 
-@when("continúo al resumen de la compra")
+@when("I continue to the order overview")
 def continue_to_overview(context):
     context.checkout_page.continue_to_overview()
 
 
-@when("finalizo la compra")
+@when("I finish the purchase")
 def finish(context):
     context.checkout_page.finish()
 
 
-@then('el total de la compra es "{total}"')
+@then('the order total is "{total}"')
 def order_total(context, total):
     expect(context.checkout_page.total).to_have_text(f"Total: {total}")
 
 
-@then('veo el mensaje de confirmación "{mensaje}"')
-def confirmation(context, mensaje):
-    expect(context.checkout_page.complete_header).to_have_text(mensaje)
+@then('I see the confirmation message "{message}"')
+def confirmation(context, message):
+    expect(context.checkout_page.complete_header).to_have_text(message)

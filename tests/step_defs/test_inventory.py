@@ -11,18 +11,18 @@ SORT_RULES = {
 }
 
 
-@then(parsers.parse("veo {cantidad:d} productos en el catálogo"))
-def product_count(inventory_page, cantidad):
-    expect(inventory_page.items).to_have_count(cantidad)
+@then(parsers.parse("I see {count:d} products in the catalog"))
+def product_count(inventory_page, count):
+    expect(inventory_page.items).to_have_count(count)
 
 
-@when(parsers.parse('ordeno los productos por "{orden}"'))
-def sort_products(inventory_page, orden):
-    inventory_page.sort_by(orden)
+@when(parsers.parse('I sort the products by "{order}"'))
+def sort_products(inventory_page, order):
+    inventory_page.sort_by(order)
 
 
-@then(parsers.parse('los productos quedan ordenados por "{orden}"'))
-def products_sorted(inventory_page, orden):
-    field, reverse = SORT_RULES[orden]
+@then(parsers.parse('the products are sorted by "{order}"'))
+def products_sorted(inventory_page, order):
+    field, reverse = SORT_RULES[order]
     values = getattr(inventory_page, field)()
-    assert values == sorted(values, reverse=reverse), f"Orden incorrecto para '{orden}': {values}"
+    assert values == sorted(values, reverse=reverse), f"Orden incorrecto para '{order}': {values}"

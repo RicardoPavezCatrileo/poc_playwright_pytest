@@ -1,31 +1,30 @@
-# language: es
 @checkout
-Característica: Proceso de compra
-  Como cliente con productos en el carrito
-  Quiero completar el checkout
-  Para recibir mi pedido
+Feature: Checkout
+  As a customer with products in the cart
+  I want to complete the checkout
+  So that I receive my order
 
-  Antecedentes:
-    Dado que inicié sesión como "standard_user"
-    Y agrego al carrito el producto "Sauce Labs Backpack"
-    Y voy al carrito
-    Y inicio el checkout
+  Background:
+    Given I am logged in as "standard_user"
+    And I add the product "Sauce Labs Backpack" to the cart
+    And I go to the cart
+    And I start the checkout
 
   @smoke
-  Escenario: Compra completa de un producto
-    Cuando ingreso nombre "Ricardo", apellido "Pavez" y código postal "8320000"
-    Y continúo al resumen de la compra
-    Entonces el total de la compra es "$32.39"
-    Cuando finalizo la compra
-    Entonces veo el mensaje de confirmación "Thank you for your order!"
+  Scenario: Complete purchase of one product
+    When I enter first name "Ricardo", last name "Pavez" and postal code "8320000"
+    And I continue to the order overview
+    Then the order total is "$32.39"
+    When I finish the purchase
+    Then I see the confirmation message "Thank you for your order!"
 
-  Esquema del escenario: Datos de envío obligatorios
-    Cuando ingreso nombre "<nombre>", apellido "<apellido>" y código postal "<cp>"
-    Y continúo al resumen de la compra
-    Entonces veo el mensaje de error "<mensaje>"
+  Scenario Outline: Shipping information is required
+    When I enter first name "<first_name>", last name "<last_name>" and postal code "<postal_code>"
+    And I continue to the order overview
+    Then I see the error message "<message>"
 
-    Ejemplos:
-      | nombre  | apellido | cp      | mensaje                        |
-      |         | Pavez    | 8320000 | Error: First Name is required  |
-      | Ricardo |          | 8320000 | Error: Last Name is required   |
-      | Ricardo | Pavez    |         | Error: Postal Code is required |
+    Examples:
+      | first_name | last_name | postal_code | message                        |
+      |            | Pavez     | 8320000     | Error: First Name is required  |
+      | Ricardo    |           | 8320000     | Error: Last Name is required   |
+      | Ricardo    | Pavez     |             | Error: Postal Code is required |

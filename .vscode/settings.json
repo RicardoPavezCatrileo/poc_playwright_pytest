@@ -1,0 +1,5 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+  "cucumber.features": ["features/**/*.feature"],
+  "cucumber.glue": ["features/steps/**/*.py"]
+}

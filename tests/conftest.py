@@ -34,27 +34,27 @@ def checkout_page(page):
     return CheckoutPage(page)
 
 
-@given(parsers.parse('que inicié sesión como "{usuario}"'))
-def logged_in_as(login_page, inventory_page, usuario):
+@given(parsers.parse('I am logged in as "{username}"'))
+def logged_in_as(login_page, inventory_page, username):
     login_page.open()
-    login_page.login(usuario, PASSWORD)
+    login_page.login(username, PASSWORD)
     expect(inventory_page.title).to_have_text("Products")
 
 
-# Registrado como given y when para poder usarlo tanto en Antecedentes como en escenarios
-@given(parsers.parse('agrego al carrito el producto "{producto}"'))
-@when(parsers.parse('agrego al carrito el producto "{producto}"'))
-def add_to_cart(inventory_page, producto):
-    inventory_page.add_to_cart(producto)
+# Registrado como given y when para poder usarlo tanto en Background como en escenarios
+@given(parsers.parse('I add the product "{product}" to the cart'))
+@when(parsers.parse('I add the product "{product}" to the cart'))
+def add_to_cart(inventory_page, product):
+    inventory_page.add_to_cart(product)
 
 
-@given("voy al carrito")
-@when("voy al carrito")
+@given("I go to the cart")
+@when("I go to the cart")
 def go_to_cart(inventory_page):
     inventory_page.go_to_cart()
 
 
-# Los valores pueden venir vacíos desde Ejemplos, por eso se usa regex con [^"]*
-@then(parsers.re(r'veo el mensaje de error "(?P<mensaje>[^"]*)"'))
-def error_message(page, mensaje):
-    expect(page.get_by_test_id("error")).to_have_text(mensaje)
+# Los valores pueden venir vacíos desde Examples, por eso se usa regex con [^"]*
+@then(parsers.re(r'I see the error message "(?P<message>[^"]*)"'))
+def error_message(page, message):
+    expect(page.get_by_test_id("error")).to_have_text(message)

@@ -1,30 +1,29 @@
-# language: es
 @login
-Característica: Inicio de sesión en Sauce Demo
-  Como cliente de la tienda
-  Quiero iniciar sesión con mis credenciales
-  Para poder ver y comprar productos
+Feature: Login to Sauce Demo
+  As a store customer
+  I want to log in with my credentials
+  So that I can browse and buy products
 
-  Antecedentes:
-    Dado que estoy en la página de login
+  Background:
+    Given I am on the login page
 
   @smoke
-  Escenario: Login exitoso con usuario estándar
-    Cuando inicio sesión con usuario "standard_user" y contraseña "secret_sauce"
-    Entonces veo la página de productos
+  Scenario: Successful login with standard user
+    When I log in with username "standard_user" and password "secret_sauce"
+    Then I see the products page
 
-  Esquema del escenario: Login fallido muestra un mensaje de error
-    Cuando inicio sesión con usuario "<usuario>" y contraseña "<clave>"
-    Entonces veo el mensaje de error "<mensaje>"
+  Scenario Outline: Failed login shows an error message
+    When I log in with username "<username>" and password "<password>"
+    Then I see the error message "<message>"
 
-    Ejemplos:
-      | usuario         | clave        | mensaje                                                                   |
+    Examples:
+      | username        | password     | message                                                                   |
       | locked_out_user | secret_sauce | Epic sadface: Sorry, this user has been locked out.                       |
-      | standard_user   | incorrecta   | Epic sadface: Username and password do not match any user in this service |
+      | standard_user   | wrong_pass   | Epic sadface: Username and password do not match any user in this service |
       |                 | secret_sauce | Epic sadface: Username is required                                        |
       | standard_user   |              | Epic sadface: Password is required                                        |
 
-  Escenario: Cerrar sesión
-    Cuando inicio sesión con usuario "standard_user" y contraseña "secret_sauce"
-    Y cierro sesión
-    Entonces vuelvo a la página de login
+  Scenario: Logout
+    When I log in with username "standard_user" and password "secret_sauce"
+    And I log out
+    Then I am back on the login page

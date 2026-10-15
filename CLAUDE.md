@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-BDD end-to-end POC against https://www.saucedemo.com using Playwright (sync API, Python 3.13). The same `.feature` files run under **two runners**: behave and pytest-bdd (+ pytest-playwright). Feature files and step text are written in **Spanish** (`# language: es` → `Característica`, `Antecedentes`, `Escenario`, `Esquema del escenario`, `Ejemplos`, `Dado/Cuando/Entonces/Y`). Keep new features and step phrases in Spanish.
+BDD end-to-end POC against https://www.saucedemo.com using Playwright (sync API, Python 3.13). The same `.feature` files run under **two runners**: behave and pytest-bdd (+ pytest-playwright). Feature files and step phrases are in **English** (Gherkin keywords and step text); code comments are in Spanish.
 
 ## Commands
 
@@ -13,11 +13,11 @@ Use the venv interpreter (`.venv/Scripts/python`); dependencies are pinned in `r
 ```
 .venv/Scripts/behave                                    # full suite (behave)
 .venv/Scripts/behave --tags=smoke                       # by tag
-.venv/Scripts/behave -n "Compra completa"               # single scenario by name
+.venv/Scripts/behave -n "Complete purchase"             # single scenario by name
 .venv/Scripts/behave -D headed=true -D slowmo=500       # watch the browser; userdata defaults in behave.ini
 .venv/Scripts/python -m pytest                          # full suite (pytest-bdd)
 .venv/Scripts/python -m pytest -m smoke                 # Gherkin tags become pytest markers
-.venv/Scripts/python -m pytest -k "compra_completa"     # single scenario (scenario name, snake_case)
+.venv/Scripts/python -m pytest -k "complete_purchase"   # single scenario (scenario name, snake_case)
 .venv/Scripts/python -m pytest --headed --slowmo 500    # watch the browser
 ```
 
@@ -29,7 +29,7 @@ Shared by both runners: `features/*.feature` and `pages/`. Step implementations 
 
 behave side:
 - `features/environment.py` — starts Playwright in `before_all`, creates a fresh browser context + page + Page Objects on `context` per scenario, saves screenshot/trace to `test-results/behave/` on failure.
-- `features/steps/saucedemo_steps.py` — all steps (behave steps are global). Empty `Ejemplos` values use the custom `{x:Texto}` parse type.
+- `features/steps/saucedemo_steps.py` — all steps (behave steps are global). Empty `Examples` values use the custom `{x:Text}` parse type.
 - Data tables need a header row (behave treats row 1 as headings; pytest-bdd step skips it with `datatable[1:]`).
 
 pytest-bdd side:
@@ -41,7 +41,7 @@ pytest-bdd side:
 Conventions that are easy to break:
 
 - A session-scoped autouse fixture sets Playwright's test-id attribute to `data-test`, so locators use `page.get_by_test_id("<data-test value>")`. Prefer that over CSS.
-- pytest-bdd matches step type: a step used after `Dado` in `Antecedentes` and after `Cuando` in a scenario needs both `@given` and `@when` stacked on the same function.
-- When an `Ejemplos` value can be empty, use `parsers.re` with `[^"]*` instead of `parsers.parse` (`{x}` needs at least one char).
+- pytest-bdd matches step type: a step used after `Given` in `Background` and after `When` in a scenario needs both `@given` and `@when` stacked on the same function.
+- When an `Examples` value can be empty, use `parsers.re` with `[^"]*` instead of `parsers.parse` (`{x}` needs at least one char).
 - Product add/remove buttons are located by slug (`add-to-cart-sauce-labs-backpack`); see `product_slug` in `pages/inventory_page.py`.
 - Shared password for all saucedemo users is `secret_sauce` (`PASSWORD` in `tests/conftest.py`).
