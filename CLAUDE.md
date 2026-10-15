@@ -2,38 +2,45 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project
+## Proyecto
 
-BDD end-to-end POC against https://www.saucedemo.com using Playwright (sync API, Python 3.13). The same `.feature` files run under **two runners**: behave and pytest-bdd (+ pytest-playwright). Feature files and step phrases are in **English** (Gherkin keywords and step text); code comments are in Spanish.
+POC de pruebas end-to-end BDD contra https://www.saucedemo.com usando Playwright (API sync, Python 3.13). Los mismos archivos `.feature` se ejecutan con **dos runners**: behave y pytest-bdd (+ pytest-playwright). Los features y las frases de los steps están en **inglés** (palabras clave de Gherkin y texto de los steps); los comentarios del código están en español.
 
-## Commands
+## Comandos
 
-Use the venv interpreter (`.venv/Scripts/python`); dependencies are pinned in `requirements.txt`.
+Usar el intérprete del venv (`.venv/Scripts/python`); las dependencias están fijadas en `requirements.txt`.
 
 ```
-.venv/Scripts/behave -n "Complete purchase"             # single scenario by name
-.venv/Scripts/behave -D headed=true -D slowmo=500       # watch the browser; userdata defaults in behave.ini
-.venv/Scripts/python -m pytest -k "complete_purchase"   # single scenario (scenario name, snake_case)
+.venv/Scripts/behave                                    # suite completa con behave
+.venv/Scripts/python -m pytest                          # suite completa con pytest-bdd
+.venv/Scripts/behave -n "Complete purchase"             # un escenario por nombre
+.venv/Scripts/behave -D headed=true -D slowmo=500       # ver el navegador; valores por defecto en behave.ini
+.venv/Scripts/python -m pytest -k "complete_purchase"   # un escenario (nombre del escenario en snake_case)
 ```
 
-Any new Gherkin tag must be registered under `markers` in `pytest.ini`.
+Todo tag nuevo de Gherkin debe registrarse en `markers` dentro de `pytest.ini`.
 
-Base URL and password come from `.env` via `settings.py` (both runners import it; missing vars raise at import). `.env` is gitignored — never commit it; add new variables to `.env.example` too. CLI `--base-url` / `-D base_url=` override the `.env` value.
+Ante una falla, ambos runners guardan screenshot y trace de Playwright en `test-results/` (behave: `test-results/behave/<escenario>/`); se abre con `.venv/Scripts/playwright show-trace <ruta>/trace.zip`.
 
-## Architecture
+La URL base y la contraseña vienen del `.env` vía `settings.py` (ambos runners lo importan; si falta una variable se lanza un error al importar). El `.env` está en `.gitignore` — nunca subirlo al repo; toda variable nueva se agrega también a `.env.example`. En la línea de comandos, `--base-url` / `-D base_url=` tienen prioridad sobre el valor del `.env`.
 
-Shared by both runners: `features/*.feature` and `pages/`. Step implementations are **duplicated** with identical phrases — any step added or reworded in a feature must be implemented in both `features/steps/saucedemo_steps.py` (behave) and `tests/` (pytest-bdd). Run both suites after changes.
+## Arquitectura
 
-behave side:
-- `features/steps/saucedemo_steps.py` — all steps (behave steps are global). Empty `Examples` values use the custom `{x:Text}` parse type.
-- Data tables need a header row (behave treats row 1 as headings; pytest-bdd step skips it with `datatable[1:]`).
+Compartido por ambos runners: `features/*.feature` y `pages/` (Page Objects con localizadores y acciones; las aserciones (`expect`) van en los steps, no en las páginas). Las implementaciones de los steps están **duplicadas** con frases idénticas — todo step que se agregue o se reformule en un feature debe implementarse tanto en `features/steps/saucedemo_steps.py` (behave) como en `tests/` (pytest-bdd). Ejecutar ambas suites después de cada cambio.
 
-pytest-bdd side:
-- Steps shared across features live in `tests/conftest.py`; put a step there as soon as a second feature needs it.
-- `pages/` — Page Objects holding locators and actions; assertions (`expect`) live in steps, not in pages.
+El ciclo de vida de Playwright también está duplicado: behave crea browser/context/page y las instancias de los Page Objects sobre `context` en `features/environment.py`; pytest-bdd los obtiene de los fixtures de pytest-playwright más los fixtures de Page Objects en `tests/conftest.py`. Un Page Object nuevo debe exportarse en `pages/__init__.py` y conectarse en ambos lados.
 
-Conventions that are easy to break:
+Lado behave:
+- `features/steps/saucedemo_steps.py` — todos los steps (en behave los steps son globales). Los valores vacíos de `Examples` usan el tipo de parseo personalizado `{x:Text}`.
+- Las tablas de datos necesitan fila de encabezado (behave toma la fila 1 como encabezados; el step de pytest-bdd la salta con `datatable[1:]`).
 
-- A session-scoped autouse fixture sets Playwright's test-id attribute to `data-test`, so locators use `page.get_by_test_id("<data-test value>")`. Prefer that over CSS.
-- pytest-bdd matches step type: a step used after `Given` in `Background` and after `When` in a scenario needs both `@given` and `@when` stacked on the same function.
-- When an `Examples` value can be empty, use `parsers.re` with `[^"]*` instead of `parsers.parse` (`{x}` needs at least one char).
+Lado pytest-bdd:
+- Un `tests/step_defs/test_<feature>.py` por feature, que lo vincula con `scenarios("<feature>.feature")` — un `.feature` nuevo solo corre en pytest cuando existe este módulo.
+- Los steps compartidos entre features van en `tests/conftest.py`; mover un step ahí apenas lo necesite un segundo feature.
+
+Convenciones fáciles de romper:
+
+- El atributo test-id de Playwright está configurado como `data-test` (pytest: fixture autouse de sesión; behave: `before_all`), por eso los localizadores usan `page.get_by_test_id("<valor de data-test>")`. Preferirlo sobre CSS.
+- `I am logged in as "<user>"` solo indica el usuario; el step toma la contraseña real de `settings.PASSWORD`, así que no ponerla en los features.
+- pytest-bdd distingue el tipo de step: un step usado después de `Given` en un `Background` y después de `When` en un escenario necesita `@given` y `@when` apilados sobre la misma función.
+- Cuando un valor de `Examples` puede venir vacío, usar `parsers.re` con `[^"]*` en vez de `parsers.parse` (`{x}` necesita al menos un carácter).

@@ -1,0 +1,883 @@
+<meta charset="UTF-8">
+<title>Guía QA POC Playwright</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  /* Diseño claro con colores explícitos */
+  *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green-deep:   #0d5d3a;
+    --green-mid:    #2a9d6a;
+    --green-soft:   #e0f0e7;
+    --naranja:        #f08a3e;
+    --naranja-soft:   #fdeacf;
+    --naranja-deep:   #b85f1c;
+    --gold:         #c9a86a;
+    --gold-soft:    #f7efde;
+    --gold-ink:     #8a6a2e;
+    --blue:         #3a7bb5;
+    --blue-soft:    #e0eaf3;
+    --purple:       #6b3aa3;
+    --purple-soft:  #ece2f5;
+    --coral:        #d97757;
+    --coral-soft:   #fbe6dd;
+    --coral-ink:    #8c2d20;
+    --surface:      #fafaf7;
+    --surface-2:    #fff;
+    --ink:          #1a1f1c;
+    --ink-2:        #2c3530;
+    --muted:        #6b7770;
+    --border:       #e3e7e2;
+    --on-dark:      #fff;
+    --radius:       14px;
+    --shadow-sm:    0 1px 3px rgba(13,93,58,.06);
+    --shadow-md:    0 4px 14px rgba(13,93,58,.08);
+    color-scheme: light;
+  }
+
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .card { transition: none; } }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--surface);
+    color: var(--ink);
+    line-height: 1.6;
+    font-size: 16px;
+  }
+  code, pre { font-family: 'JetBrains Mono', 'Courier New', monospace; }
+  code {
+    background: var(--green-soft);
+    color: var(--green-deep);
+    padding: 1px 6px;
+    border-radius: 5px;
+    font-size: 0.9em;
+    overflow-wrap: anywhere;
+  }
+  a { color: var(--green-mid); font-weight: 600; }
+  a:focus-visible { outline: 2px solid var(--naranja); outline-offset: 2px; }
+
+  /* ─── Layout ──────────────────────────────────────────────────────────── */
+  .container {
+    max-width: 1100px; margin: 0 auto;
+    padding-left: max(24px, env(safe-area-inset-left, 0px));
+    padding-right: max(24px, env(safe-area-inset-right, 0px));
+  }
+  @media (max-width: 480px) {
+    .container {
+      padding-left: max(16px, env(safe-area-inset-left, 0px));
+      padding-right: max(16px, env(safe-area-inset-right, 0px));
+    }
+  }
+  section { padding: 56px 0; border-top: 1px solid var(--border); }
+  section:first-of-type { border-top: none; }
+  section.alt { background: var(--green-soft); }
+
+  /* ─── Hero ────────────────────────────────────────────────────────────── */
+  .hero {
+    background: linear-gradient(135deg, var(--green-deep) 0%, var(--green-mid) 60%, var(--naranja) 130%);
+    color: var(--on-dark);
+    padding: 72px 0 64px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; top: -100px; right: -100px;
+    width: 360px; height: 360px;
+    background: radial-gradient(circle, rgba(240,138,62,0.35) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .hero-emoji { font-size: 64px; margin-bottom: 12px; display: block; }
+  .hero h1 {
+    font-size: 44px; font-weight: 800; letter-spacing: -1.2px; margin-bottom: 10px;
+    position: relative; text-wrap: balance;
+  }
+  .hero p.slogan {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-style: italic;
+    font-size: 19px;
+    color: var(--on-dark);
+    opacity: 0.95;
+    max-width: 680px;
+    margin: 0 auto 18px;
+    padding: 10px 22px;
+    border-top: 1px solid rgba(255,255,255,0.25);
+    border-bottom: 1px solid rgba(255,255,255,0.25);
+    position: relative;
+    line-height: 1.45;
+  }
+  .hero p.slogan strong { color: var(--naranja-soft); font-weight: 600; font-style: normal; letter-spacing: 0.3px; }
+  .hero p.tag { font-size: 18px; opacity: 0.92; max-width: 720px; margin: 0 auto 22px; position: relative; }
+  .hero .pills { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; position: relative; margin-top: 16px; }
+  .pill {
+    background: rgba(255,255,255,0.16);
+    border: 1px solid rgba(255,255,255,0.28);
+    color: var(--on-dark);
+    padding: 7px 16px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    backdrop-filter: blur(8px);
+  }
+  @media (max-width: 600px) { .hero h1 { font-size: 34px; } .hero p.tag { font-size: 16px; } }
+
+  /* ─── Tipografía secciones ────────────────────────────────────────────── */
+  .kicker {
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 1.8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--green-mid);
+    margin-bottom: 8px;
+  }
+  h2 { font-size: 30px; font-weight: 800; letter-spacing: -0.6px; color: var(--green-deep); margin-bottom: 14px; text-wrap: balance; }
+  h3 { font-size: 18px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+  .lead { font-size: 18px; color: var(--ink-2); max-width: 800px; margin-bottom: 32px; }
+  @media (max-width: 600px) { h2 { font-size: 25px; } .lead { font-size: 16.5px; } }
+
+  /* ─── Cards ───────────────────────────────────────────────────────────── */
+  .grid { display: grid; gap: 20px; }
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 780px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 22px 20px;
+    box-shadow: var(--shadow-sm);
+    transition: transform .15s, box-shadow .15s;
+    min-width: 0;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .card .icon { font-size: 28px; margin-bottom: 12px; display: block; }
+  .card h3 { font-size: 17px; margin-bottom: 6px; }
+  .card p { font-size: 14.5px; color: var(--ink-2); }
+  .card.green  { border-top: 4px solid var(--green-mid); }
+  .card.naranja  { border-top: 4px solid var(--naranja); }
+  .card.gold   { border-top: 4px solid var(--gold); }
+  .card.blue   { border-top: 4px solid var(--blue); }
+  .card.purple { border-top: 4px solid var(--purple); }
+  .card.coral  { border-top: 4px solid var(--coral); }
+
+  /* ─── Diagramas SVG ───────────────────────────────────────────────────── */
+  .diagram {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 24px;
+    margin-top: 16px;
+    box-shadow: var(--shadow-sm);
+    overflow-x: auto;
+  }
+  .diagram svg { display: block; margin: 0 auto; width: 100%; min-width: 680px; height: auto; }
+  .diagram-caption { text-align: center; color: var(--muted); font-size: 13px; margin-top: 12px; font-style: italic; }
+
+  /* ─── Tarjetas por feature ────────────────────────────────────────────── */
+  .test-types { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-top: 20px; }
+  @media (max-width: 980px) { .test-types { grid-template-columns: repeat(2,1fr); } }
+  @media (max-width: 540px) { .test-types { grid-template-columns: 1fr; } }
+  .test-card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 18px 16px;
+    box-shadow: var(--shadow-sm);
+    border-top: 4px solid var(--green-mid);
+    min-width: 0;
+  }
+  .badge {
+    display: inline-block;
+    background: var(--green-soft);
+    color: var(--green-deep);
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 10px;
+  }
+  .test-card h3 { font-size: 16px; margin-bottom: 8px; }
+  .test-card p { font-size: 14px; color: var(--ink-2); margin-bottom: 8px; }
+  .test-card .ex { font-size: 12.5px; color: var(--muted); margin-bottom: 0; }
+  .test-card.api  { border-top-color: var(--blue); }
+  .test-card.api .badge { background: var(--blue-soft); color: var(--blue); }
+  .test-card.data { border-top-color: var(--gold); }
+  .test-card.data .badge { background: var(--gold-soft); color: var(--gold-ink); }
+  .test-card.perf { border-top-color: var(--purple); }
+  .test-card.perf .badge { background: var(--purple-soft); color: var(--purple); }
+  .test-card.sec  { border-top-color: var(--coral); grid-column: 1 / -1; }
+  .test-card.sec .badge { background: var(--coral-soft); color: var(--coral-ink); }
+  .badge.wip { background: var(--naranja-soft); color: var(--naranja-deep); }
+  .badge.no  { background: var(--coral-soft); color: var(--coral-ink); }
+
+  /* ─── Tablas ──────────────────────────────────────────────────────────── */
+  .tw { overflow-x: auto; margin-top: 18px; border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+  table { width: 100%; min-width: 620px; border-collapse: collapse; background: var(--surface-2); }
+  th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border); font-size: 14.5px; vertical-align: top; }
+  th { background: var(--green-soft); color: var(--green-deep); font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+  tr:last-child td { border-bottom: none; }
+  td code { font-size: 13px; }
+  tr:hover td { background: rgba(13,93,58,0.02); }
+  td.n { font-variant-numeric: tabular-nums; }
+
+  /* ─── Pasos numerados ─────────────────────────────────────────────────── */
+  .steps { counter-reset: step; display: grid; gap: 16px; margin-top: 18px; }
+  .step {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 18px;
+    align-items: start;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 22px;
+    box-shadow: var(--shadow-sm);
+  }
+  .step > div { min-width: 0; }
+  .step::before {
+    counter-increment: step;
+    content: counter(step);
+    background: var(--green-deep);
+    color: var(--on-dark);
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 800;
+  }
+  .step h3 { margin-bottom: 6px; }
+  .step p { color: var(--ink-2); font-size: 14.5px; }
+  .step code { font-size: 13px; }
+  @media (max-width: 480px) { .step { grid-template-columns: 1fr; gap: 10px; padding: 16px; } }
+
+  pre.cmd {
+    background: #10241b; color: #dcebe2; padding: 12px 14px; border-radius: 8px;
+    font-size: 13px; line-height: 1.6; margin-top: 10px; overflow-x: auto;
+  }
+  pre.cmd .c { color: #8fb3a0; }
+
+  /* ─── Callout ─────────────────────────────────────────────────────────── */
+  .callout {
+    background: var(--naranja-soft);
+    border-left: 4px solid var(--naranja);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-top: 22px;
+    color: var(--naranja-deep);
+    font-size: 14.5px;
+  }
+  .callout strong { color: var(--naranja-deep); }
+  .callout code { background: rgba(255,255,255,.6); }
+
+  /* ─── Footer ──────────────────────────────────────────────────────────── */
+  footer { background: var(--green-deep); color: var(--on-dark); text-align: center; padding: 36px 0; font-size: 14px; }
+  footer code { background: rgba(255,255,255,.14); color: var(--on-dark); }
+
+  /* ─── Mini-nav ────────────────────────────────────────────────────────── */
+  .toc {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    z-index: 50;
+    padding: 12px 0;
+  }
+  .toc ul { display: flex; gap: 6px 18px; flex-wrap: wrap; justify-content: center; list-style: none; }
+  .toc a {
+    color: var(--ink-2);
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 500;
+    padding: 6px 10px;
+    border-radius: 6px;
+    transition: background .15s;
+  }
+  .toc a:hover { background: var(--green-soft); color: var(--green-deep); }
+  @media (max-width: 700px) {
+    .toc { position: static; }
+    .toc ul { justify-content: flex-start; }
+  }
+</style>
+
+<!-- ═════════════ HERO ═════════════ -->
+<header class="hero">
+  <div class="container">
+    <span class="hero-emoji">🎭</span>
+    <h1>POC Playwright + pytest</h1>
+    <p class="slogan">«Un mismo Gherkin, dos runners: <strong>la comparación es la prueba</strong>.»</p>
+    <p class="tag">Pruebas end-to-end de saucedemo.com escritas una vez en Gherkin y ejecutadas con behave y con pytest-bdd sobre Playwright, para decidir con evidencia qué runner usar.</p>
+    <div class="pills">
+      <span class="pill">🖥️ UI E2E</span>
+      <span class="pill">📋 BDD en Gherkin</span>
+      <span class="pill">⚙️ behave</span>
+      <span class="pill">🧪 pytest-bdd</span>
+      <span class="pill">✅ 17/17 en ambos</span>
+    </div>
+  </div>
+</header>
+
+<!-- ═════════════ TOC ═════════════ -->
+<nav class="toc" aria-label="Secciones">
+  <div class="container">
+    <ul>
+      <li><a href="#que-es">¿Qué es?</a></li>
+      <li><a href="#valor">¿Qué resuelve?</a></li>
+      <li><a href="#composicion">¿De qué está hecho?</a></li>
+      <li><a href="#cobertura">Cobertura</a></li>
+      <li><a href="#flujo">Flujo de trabajo</a></li>
+      <li><a href="#runners">behave vs pytest-bdd</a></li>
+      <li><a href="#fallos">Cuando algo falla</a></li>
+      <li><a href="#comandos">Comandos</a></li>
+      <li><a href="#empezar">Primer ciclo</a></li>
+      <li><a href="#estado">Estado</a></li>
+      <li><a href="#profundizar">Profundizar</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ═════════════ 1. ¿QUÉ ES? ═════════════ -->
+<section id="que-es">
+  <div class="container">
+    <span class="kicker">01 · El concepto</span>
+    <h2>¿Qué es este POC?</h2>
+    <p class="lead">Es una <strong>prueba de concepto de automatización E2E</strong> contra
+      <code>https://www.saucedemo.com</code>, una tienda pública de práctica. Los escenarios se escriben
+      una sola vez en Gherkin y se ejecutan con <strong>dos runners distintos</strong>, para comparar
+      cuánto cuesta cada uno antes de llevarlo a un framework real.</p>
+
+    <div class="grid grid-3">
+      <div class="card green">
+        <span class="icon">🎭</span>
+        <h3>Playwright</h3>
+        <p>API sync de Playwright 1.64 con Python 3.13 y Chromium. Los localizadores usan el atributo
+          <code>data-test</code> del sitio con <code>get_by_test_id</code>, que es más estable que CSS.</p>
+      </div>
+      <div class="card naranja">
+        <span class="icon">📋</span>
+        <h3>BDD legible</h3>
+        <p>Las pruebas se escriben en Gherkin (Given/When/Then), la sintaxis de <strong>BDD</strong>
+          (Behavior Driven Development, desarrollo guiado por comportamiento). Los features y las frases
+          de los steps están en inglés.</p>
+      </div>
+      <div class="card gold">
+        <span class="icon">⚖️</span>
+        <h3>Dos runners, un contrato</h3>
+        <p><strong>behave</strong> y <strong>pytest-bdd</strong> ejecutan los mismos
+          <code>.feature</code> y los mismos Page Objects. Solo se duplica lo propio de cada runner:
+          los steps y el manejo del navegador.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════ 2. VALOR ═════════════ -->
+<section id="valor" class="alt">
+  <div class="container">
+    <span class="kicker">02 · El valor</span>
+    <h2>¿Qué problema resuelve?</h2>
+    <p class="lead">Elegir un runner BDD suele hacerse por costumbre. Este POC lo resuelve con un caso
+      real implementado dos veces, para ver las diferencias en el código y no en una presentación.</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <span class="icon">🔍</span>
+        <h3>Comparación justa</h3>
+        <p>Como los features son idénticos, cualquier diferencia entre las suites es del runner y no de
+          la prueba. Cada step que hubo que escribir distinto quedó documentado.</p>
+      </div>
+      <div class="card">
+        <span class="icon">🧩</span>
+        <h3>Page Objects reutilizables</h3>
+        <p><code>LoginPage</code>, <code>InventoryPage</code>, <code>CartPage</code> y
+          <code>CheckoutPage</code> se usan sin cambios en los dos runners. Guardan localizadores y
+          acciones; las verificaciones (<code>expect</code>) viven en los steps.</p>
+      </div>
+      <div class="card">
+        <span class="icon">📸</span>
+        <h3>Evidencia automática al fallar</h3>
+        <p>Cada escenario fallido deja screenshot y trace de Playwright en <code>test-results/</code>.
+          El trace permite revisar paso a paso qué vio el navegador.</p>
+      </div>
+      <div class="card">
+        <span class="icon">🔐</span>
+        <h3>Configuración fuera del código</h3>
+        <p>La URL base y la contraseña se leen del <code>.env</code> mediante <code>settings.py</code>.
+          El <code>.env</code> no se sube al repo; la plantilla es <code>.env.example</code>.</p>
+      </div>
+      <div class="card">
+        <span class="icon">🧭</span>
+        <h3>Navegación en VS Code</h3>
+        <p>La extensión Cucumber está configurada: colores y autocompletado en los <code>.feature</code>,
+          y Ctrl+clic desde una línea del feature a su step de behave.</p>
+      </div>
+      <div class="card">
+        <span class="icon">🤖</span>
+        <h3>Listo para trabajar con Claude Code</h3>
+        <p>El <code>CLAUDE.md</code> describe la arquitectura y las reglas fáciles de romper, para que
+          cualquier cambio asistido mantenga los dos runners sincronizados.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════ 3. COMPOSICIÓN ═════════════ -->
+<section id="composicion">
+  <div class="container">
+    <span class="kicker">03 · Las piezas</span>
+    <h2>¿De qué está hecho?</h2>
+    <p class="lead">Cinco capas. El rol QA trabaja sobre los features; la capa de steps es la única
+      que se divide en dos.</p>
+
+    <div class="diagram">
+      <svg viewBox="0 0 880 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Capas del POC: features compartidos, steps duplicados por runner, Page Objects compartidos y Playwright">
+        <defs>
+          <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L10,5 L0,10 z" fill="#2a9d6a"/>
+          </marker>
+        </defs>
+
+        <!-- Capa 1: QA -->
+        <rect x="20" y="20" width="840" height="64" rx="10" fill="#fdeacf" stroke="#f08a3e" stroke-width="2"/>
+        <text x="40" y="49" font-size="14" font-weight="700" fill="#b85f1c" font-family="Inter,sans-serif">👤 Rol QA</text>
+        <text x="40" y="69" font-size="13" fill="#6b3919" font-family="Inter,sans-serif">Escribe o revisa los escenarios en Gherkin. Cada frase nueva se implementa en los dos runners.</text>
+
+        <!-- Capa 2: features -->
+        <rect x="20" y="106" width="840" height="64" rx="10" fill="#e0f0e7" stroke="#2a9d6a" stroke-width="2"/>
+        <text x="40" y="135" font-size="14" font-weight="700" fill="#0d5d3a" font-family="Inter,sans-serif">📋 features/*.feature · compartido</text>
+        <text x="40" y="155" font-size="13" fill="#2c3530" font-family="Inter,sans-serif">4 features · 17 escenarios · tags @login @inventory @cart @checkout @smoke</text>
+
+        <!-- Capa 3: runners -->
+        <rect x="20" y="196" width="410" height="92" rx="10" fill="#f7efde" stroke="#c9a86a" stroke-width="2"/>
+        <text x="40" y="224" font-size="14" font-weight="700" fill="#8a6a2e" font-family="Inter,sans-serif">⚙️ behave</text>
+        <text x="40" y="245" font-size="12.5" fill="#2c3530" font-family="Inter,sans-serif">features/steps/saucedemo_steps.py</text>
+        <text x="40" y="264" font-size="12.5" fill="#6b7770" font-family="Inter,sans-serif">Navegador con hooks en features/environment.py</text>
+        <text x="40" y="280" font-size="12.5" fill="#6b7770" font-family="Inter,sans-serif">Opciones en behave.ini</text>
+
+        <rect x="450" y="196" width="410" height="92" rx="10" fill="#ece2f5" stroke="#6b3aa3" stroke-width="2"/>
+        <text x="470" y="224" font-size="14" font-weight="700" fill="#3e2061" font-family="Inter,sans-serif">🧪 pytest-bdd</text>
+        <text x="470" y="245" font-size="12.5" fill="#2c3530" font-family="Inter,sans-serif">tests/step_defs/test_&lt;feature&gt;.py + tests/conftest.py</text>
+        <text x="470" y="264" font-size="12.5" fill="#6b7770" font-family="Inter,sans-serif">Navegador con fixtures de pytest-playwright</text>
+        <text x="470" y="280" font-size="12.5" fill="#6b7770" font-family="Inter,sans-serif">Opciones en pytest.ini</text>
+
+        <!-- Capa 4: Page Objects -->
+        <rect x="20" y="314" width="840" height="64" rx="10" fill="#e0eaf3" stroke="#3a7bb5" stroke-width="2"/>
+        <text x="40" y="343" font-size="14" font-weight="700" fill="#1c4870" font-family="Inter,sans-serif">📦 pages/ · Page Objects compartidos</text>
+        <text x="40" y="363" font-size="13" fill="#2c3530" font-family="Inter,sans-serif">LoginPage · InventoryPage · CartPage · CheckoutPage: localizadores data-test y acciones, sin asserts</text>
+
+        <!-- Capa 5: Playwright -->
+        <rect x="20" y="404" width="840" height="64" rx="10" fill="#fbe6dd" stroke="#d97757" stroke-width="2"/>
+        <text x="40" y="433" font-size="14" font-weight="700" fill="#8c2d20" font-family="Inter,sans-serif">🌐 Playwright 1.64 + Chromium → saucedemo.com</text>
+        <text x="40" y="453" font-size="13" fill="#2c3530" font-family="Inter,sans-serif">Contexto nuevo por escenario · URL y contraseña desde .env (settings.py) · screenshot y trace al fallar</text>
+
+        <!-- Flechas -->
+        <line x1="440" y1="84" x2="440" y2="104" stroke="#2a9d6a" stroke-width="2" marker-end="url(#arrow)"/>
+        <line x1="300" y1="170" x2="225" y2="194" stroke="#2a9d6a" stroke-width="2" marker-end="url(#arrow)"/>
+        <line x1="580" y1="170" x2="655" y2="194" stroke="#2a9d6a" stroke-width="2" marker-end="url(#arrow)"/>
+        <line x1="225" y1="288" x2="300" y2="312" stroke="#2a9d6a" stroke-width="2" marker-end="url(#arrow)"/>
+        <line x1="655" y1="288" x2="580" y2="312" stroke="#2a9d6a" stroke-width="2" marker-end="url(#arrow)"/>
+        <line x1="440" y1="378" x2="440" y2="402" stroke="#2a9d6a" stroke-width="2" marker-end="url(#arrow)"/>
+      </svg>
+      <p class="diagram-caption">Los features y los Page Objects existen una sola vez. Los steps y el manejo del navegador existen dos veces, uno por runner.</p>
+    </div>
+
+    <div class="callout">
+      <strong>📌 La regla de oro:</strong> el <code>.feature</code> es el contrato. Si se agrega o se cambia
+      una frase, se implementa con el mismo texto en <code>features/steps/saucedemo_steps.py</code> (behave)
+      y en <code>tests/</code> (pytest-bdd), y después se ejecutan las dos suites.
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════ 4. COBERTURA ═════════════ -->
+<section id="cobertura">
+  <div class="container">
+    <span class="kicker">04 · La cobertura</span>
+    <h2>Los 4 features y el tag transversal @smoke</h2>
+    <p class="lead">17 escenarios que recorren el flujo completo de compra de Sauce Demo, más los errores
+      de validación más comunes. Cada feature tiene su tag, y <code>@smoke</code> marca el camino crítico.</p>
+
+    <div class="test-types">
+      <div class="test-card">
+        <span class="badge">@login</span>
+        <h3>🔑 Inicio de sesión</h3>
+        <p><strong>6 escenarios.</strong> Login exitoso, usuario bloqueado, credenciales inválidas,
+          usuario vacío, contraseña vacía y logout.</p>
+        <p class="ex">Los 4 errores van en un Scenario Outline con <code>Examples</code>.</p>
+      </div>
+      <div class="test-card api">
+        <span class="badge">@inventory</span>
+        <h3>🛍️ Catálogo</h3>
+        <p><strong>5 escenarios.</strong> Se ven los 6 productos, y el orden por nombre (A-Z, Z-A) y por
+          precio (ascendente, descendente).</p>
+        <p class="ex">El orden se verifica leyendo la página, no contra una lista fija.</p>
+      </div>
+      <div class="test-card data">
+        <span class="badge">@cart</span>
+        <h3>🛒 Carrito</h3>
+        <p><strong>2 escenarios.</strong> Agregar dos productos (badge en "2" y ambos en el carrito) y
+          quitar un producto.</p>
+        <p class="ex">Usa una tabla de datos con fila de encabezado.</p>
+      </div>
+      <div class="test-card perf">
+        <span class="badge">@checkout</span>
+        <h3>💳 Checkout</h3>
+        <p><strong>4 escenarios.</strong> Compra completa con total <code>$32.39</code> y mensaje de
+          confirmación; nombre, apellido y código postal obligatorios.</p>
+        <p class="ex">El Background deja un producto en el carrito.</p>
+      </div>
+
+      <div class="test-card sec">
+        <span class="badge">@smoke · camino crítico</span>
+        <h3>🚦 Smoke (tag transversal)</h3>
+        <p>Un escenario por feature: login exitoso, catálogo completo, agregar al carrito y compra
+          completa. Son <strong>4 escenarios</strong> que confirman en segundos que el flujo principal
+          funciona. Se ejecutan con <code>behave --tags=smoke</code> o <code>pytest -m smoke</code>.</p>
+        <p class="ex">En pytest-bdd cada tag se convierte en un marker, así que todo tag nuevo se registra
+          en <code>markers</code> dentro de <code>pytest.ini</code>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════ 5. FLUJO ═════════════ -->
+<section id="flujo" class="alt">
+  <div class="container">
+    <span class="kicker">05 · El flujo</span>
+    <h2>Cómo se agrega o cambia una prueba</h2>
+    <p class="lead">El ciclo siempre pasa por los dos runners. Un cambio solo está terminado cuando
+      ambas suites quedan en verde.</p>
+
+    <div class="diagram">
+      <svg viewBox="0 0 940 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Flujo para agregar una prueba: escribir el feature, implementar el step en behave y en pytest-bdd, ejecutar ambas suites y revisar la evidencia">
+        <defs>
+          <marker id="arrow2" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L10,5 L0,10 z" fill="#0d5d3a"/>
+          </marker>
+        </defs>
+
+        <!-- Fila 1 -->
+        <rect x="20" y="20" width="150" height="64" rx="10" fill="#fdeacf" stroke="#f08a3e" stroke-width="2"/>
+        <text x="95" y="46" text-anchor="middle" font-size="20" font-family="Inter,sans-serif">✍️</text>
+        <text x="95" y="65" text-anchor="middle" font-size="12.5" font-weight="700" fill="#b85f1c" font-family="Inter,sans-serif">Escribir .feature</text>
+        <text x="95" y="79" text-anchor="middle" font-size="11" fill="#6b3919" font-family="Inter,sans-serif">Gherkin en inglés</text>
+
+        <rect x="206" y="20" width="150" height="64" rx="10" fill="#f7efde" stroke="#c9a86a" stroke-width="2"/>
+        <text x="281" y="46" text-anchor="middle" font-size="20" font-family="Inter,sans-serif">⚙️</text>
+        <text x="281" y="65" text-anchor="middle" font-size="12.5" font-weight="700" fill="#8a6a2e" font-family="Inter,sans-serif">Step en behave</text>
+        <text x="281" y="79" text-anchor="middle" font-size="11" fill="#6b7770" font-family="Inter,sans-serif">saucedemo_steps.py</text>
+
+        <rect x="392" y="20" width="150" height="64" rx="10" fill="#ece2f5" stroke="#6b3aa3" stroke-width="2"/>
+        <text x="467" y="46" text-anchor="middle" font-size="20" font-family="Inter,sans-serif">🧪</text>
+        <text x="467" y="65" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3e2061" font-family="Inter,sans-serif">Step en pytest-bdd</text>
+        <text x="467" y="79" text-anchor="middle" font-size="11" fill="#6b7770" font-family="Inter,sans-serif">step_defs o conftest</text>
+
+        <rect x="578" y="20" width="150" height="64" rx="10" fill="#e0f0e7" stroke="#2a9d6a" stroke-width="2"/>
+        <text x="653" y="46" text-anchor="middle" font-size="20" font-family="Inter,sans-serif">▶️</text>
+        <text x="653" y="65" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0d5d3a" font-family="Inter,sans-serif">Ejecutar ambas</text>
+        <text x="653" y="79" text-anchor="middle" font-size="11" fill="#6b7770" font-family="Inter,sans-serif">behave + pytest</text>
+
+        <rect x="764" y="20" width="156" height="64" rx="10" fill="#e0eaf3" stroke="#3a7bb5" stroke-width="2"/>
+        <text x="842" y="46" text-anchor="middle" font-size="20" font-family="Inter,sans-serif">✅</text>
+        <text x="842" y="65" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1c4870" font-family="Inter,sans-serif">Commit</text>
+        <text x="842" y="79" text-anchor="middle" font-size="11" fill="#6b7770" font-family="Inter,sans-serif">con las dos en verde</text>
+
+        <line x1="170" y1="52" x2="206" y2="52" stroke="#0d5d3a" stroke-width="2" marker-end="url(#arrow2)"/>
+        <line x1="356" y1="52" x2="392" y2="52" stroke="#0d5d3a" stroke-width="2" marker-end="url(#arrow2)"/>
+        <line x1="542" y1="52" x2="578" y2="52" stroke="#0d5d3a" stroke-width="2" marker-end="url(#arrow2)"/>
+        <line x1="728" y1="52" x2="764" y2="52" stroke="#0d5d3a" stroke-width="2" marker-end="url(#arrow2)"/>
+
+        <!-- Bajo "Escribir .feature": reglas de Gherkin -->
+        <line x1="95" y1="84" x2="95" y2="116" stroke="#c79a3e" stroke-width="2" stroke-dasharray="4,4"/>
+        <rect x="20" y="116" width="336" height="44" rx="8" fill="#f6ecd4" stroke="#c79a3e" stroke-width="1.8"/>
+        <text x="188" y="135" text-anchor="middle" font-size="12" font-weight="700" fill="#7a5a12" font-family="Inter,sans-serif">🏷️ Tag nuevo → registrarlo en pytest.ini</text>
+        <text x="188" y="151" text-anchor="middle" font-size="11" fill="#7a5a12" font-family="Inter,sans-serif">sin eso pytest lo reporta como marker desconocido</text>
+        <rect x="20" y="166" width="336" height="44" rx="8" fill="#f6ecd4" stroke="#c79a3e" stroke-width="1.8"/>
+        <text x="188" y="185" text-anchor="middle" font-size="12" font-weight="700" fill="#7a5a12" font-family="Inter,sans-serif">📄 Feature nuevo → test_&lt;feature&gt;.py</text>
+        <text x="188" y="201" text-anchor="middle" font-size="11" fill="#7a5a12" font-family="Inter,sans-serif">con scenarios("x.feature"); si no, pytest no lo ejecuta</text>
+
+        <!-- Bajo "Ejecutar ambas": resultados actuales -->
+        <line x1="653" y1="84" x2="653" y2="116" stroke="#2a9d6a" stroke-width="2" stroke-dasharray="4,4"/>
+        <rect x="560" y="116" width="180" height="44" rx="8" fill="#fff" stroke="#2a9d6a" stroke-width="1.5"/>
+        <text x="650" y="136" text-anchor="middle" font-size="12" font-weight="700" fill="#0d5d3a" font-family="Inter,sans-serif">behave · 17/17</text>
+        <text x="650" y="151" text-anchor="middle" font-size="10.5" fill="#6b7770" font-family="Inter,sans-serif">73 steps · ≈8 s</text>
+        <rect x="560" y="166" width="180" height="44" rx="8" fill="#fff" stroke="#2a9d6a" stroke-width="1.5"/>
+        <text x="650" y="186" text-anchor="middle" font-size="12" font-weight="700" fill="#0d5d3a" font-family="Inter,sans-serif">pytest-bdd · 17/17</text>
+        <text x="650" y="201" text-anchor="middle" font-size="10.5" fill="#6b7770" font-family="Inter,sans-serif">≈16 s</text>
+
+        <!-- Si falla -->
+        <rect x="20" y="236" width="900" height="74" rx="10" fill="#fbe6dd" stroke="#d97757" stroke-width="2"/>
+        <text x="470" y="262" text-anchor="middle" font-size="12.5" font-weight="700" fill="#8c2d20" font-family="Inter,sans-serif">📸 Si un escenario falla: screenshot + trace en test-results/</text>
+        <text x="470" y="282" text-anchor="middle" font-size="11.5" fill="#8c2d20" font-family="Inter,sans-serif">behave guarda una carpeta por escenario en test-results/behave/; pytest-bdd lo hace con --screenshot only-on-failure y --tracing retain-on-failure.</text>
+        <text x="470" y="298" text-anchor="middle" font-size="11.5" fill="#8c2d20" font-family="Inter,sans-serif">El trace se abre con: playwright show-trace &lt;carpeta&gt;/trace.zip</text>
+      </svg>
+      <p class="diagram-caption">Lo que hace el QA: escribir el escenario, implementarlo en los dos runners y confirmar que <strong>las dos suites</strong> pasan antes de subir el cambio.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════ 6. RUNNERS ═════════════ -->
+<section id="runners">
+  <div class="container">
+    <span class="kicker">06 · La comparación</span>
+    <h2>behave vs pytest-bdd: dónde se comportan distinto</h2>
+    <p class="lead">Estas diferencias salieron al implementar los 17 escenarios. Cada una obligó a
+      escribir algo distinto en un runner y en el otro.</p>
+
+    <div class="grid grid-2">
+      <div class="card gold">
+        <span class="icon">⚙️</span>
+        <h3>behave</h3>
+        <p>Steps globales en un solo archivo. <code>@step</code> acepta Given, When y Then. El navegador,
+          los Page Objects, los screenshots y los traces se programaron a mano en
+          <code>features/environment.py</code>.</p>
+      </div>
+      <div class="card purple">
+        <span class="icon">🧪</span>
+        <h3>pytest-bdd</h3>
+        <p>Un módulo por feature y steps compartidos en <code>conftest.py</code>. pytest-playwright trae
+          el navegador, el contexto por test, los screenshots y los traces. A cambio, distingue el tipo
+          de cada step.</p>
+      </div>
+    </div>
+
+    <div class="tw">
+      <table>
+        <thead><tr><th>Tema</th><th>behave</th><th>pytest-bdd</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Valores vacíos en <code>Examples</code></strong></td>
+              <td>Tipo propio <code>{x:Text}</code> registrado con <code>register_type</code></td>
+              <td><code>parsers.re</code> con <code>[^"]*</code>; <code>{x}</code> exige al menos un carácter</td></tr>
+          <tr><td><strong>Tipo de step</strong></td>
+              <td>No lo distingue</td>
+              <td>Un step usado como <code>Given</code> en el Background y como <code>When</code> en un escenario necesita <code>@given</code> y <code>@when</code> apilados</td></tr>
+          <tr><td><strong>Tablas de datos</strong></td>
+              <td>La fila 1 se toma como encabezado</td>
+              <td>Llega completa; el step salta el encabezado con <code>datatable[1:]</code></td></tr>
+          <tr><td><strong>Atributo <code>data-test</code></strong></td>
+              <td>Se configura en <code>before_all</code></td>
+              <td>Se configura en un fixture autouse de sesión</td></tr>
+          <tr><td><strong>Ver el navegador</strong></td>
+              <td><code>-D headed=true -D slowmo=500</code></td>
+              <td><code>--headed --slowmo 500</code></td></tr>
+          <tr><td><strong>Cambiar la URL</strong></td>
+              <td><code>-D base_url=&lt;url&gt;</code></td>
+              <td><code>--base-url &lt;url&gt;</code></td></tr>
+          <tr><td><strong>Un Page Object nuevo</strong></td>
+              <td>Se crea en <code>before_scenario</code></td>
+              <td>Se agrega como fixture en <code>conftest.py</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════ 6b. CUANDO ALGO FALLA ═════════════ -->
+<section id="fallos">
+  <div class="container">
+    <span class="kicker">06b · Cuando algo falla</span>
+    <h2>¿Falló la app o falló la prueba?</h2>
+    <p class="lead">Un escenario en rojo puede significar dos cosas muy distintas. La evidencia que deja
+      cada falla sirve para distinguirlas antes de tocar el código.</p>
+
+    <div class="grid grid-2">
+      <div class="card green">
+        <span class="icon">🔧</span>
+        <h3>Fallo técnico → se corrige la prueba</h3>
+        <p>Cambió un <code>data-test</code>, una frase del feature no coincide con su step, o falta una
+          variable en el <code>.env</code>. <strong>La app está bien; la prueba quedó desactualizada.</strong>
+          Se corrige en el Page Object o en el step, en los dos runners.</p>
+      </div>
+      <div class="card naranja">
+        <span class="icon">🐞</span>
+        <h3>Fallo funcional → es un defecto de la app</h3>
+        <p>La app no hace lo que el <code>.feature</code> declara: un total distinto, un mensaje de error
+          que no aparece, un producto mal ordenado. <strong>La prueba está bien; el producto no.</strong></p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>⚖️ La regla que no se negocia:</strong> el <code>.feature</code> es el criterio de verdad.
+      Si la app no cumple lo que el escenario describe, el escenario <strong>debe</strong> fallar. No se
+      cambia una aserción para dejar en verde algo que el producto no cumple.
+    </div>
+
+    <h3 style="margin-top:34px;">Cómo revisar una falla</h3>
+    <div class="steps">
+      <div class="step">
+        <div>
+          <h3>Leer el mensaje del runner</h3>
+          <p>La consola muestra el step que falló y el error de <code>expect</code> o del
+            <code>assert</code>, con el valor esperado y el obtenido. Si el step ni siquiera se encontró,
+            es casi siempre una frase que no coincide entre el feature y el step.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div>
+          <h3>Mirar el screenshot</h3>
+          <p>Está en <code>test-results/</code> (behave: <code>test-results/behave/&lt;escenario&gt;/screenshot.png</code>).
+            Muestra cómo estaba la página en el momento de la falla.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div>
+          <h3>Abrir el trace</h3>
+          <p><code>playwright show-trace test-results/&lt;carpeta&gt;/trace.zip</code> permite recorrer
+            cada acción, ver el DOM antes y después, y la red. Para verlo en vivo, ejecutar el escenario
+            con el navegador visible y <code>slowmo</code>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════ 7. COMANDOS ═════════════ -->
+<section id="comandos">
+  <div class="container">
+    <span class="kicker">07 · La caja de herramientas</span>
+    <h2>Los comandos de uso más frecuente</h2>
+    <p class="lead">Se ejecutan desde la raíz del proyecto con el entorno virtual activado
+      (<code>.\.venv\Scripts\Activate.ps1</code>).</p>
+
+    <div class="tw">
+      <table>
+        <thead><tr><th>Comando</th><th>¿Para qué?</th><th>¿Cuándo lo uso?</th></tr></thead>
+        <tbody>
+          <tr><td><code>behave</code></td><td>Ejecuta toda la suite con behave (headless, Chromium)</td><td>Después de cualquier cambio</td></tr>
+          <tr><td><code>pytest</code></td><td>Ejecuta toda la suite con pytest-bdd</td><td>Después de cualquier cambio, junto con <code>behave</code></td></tr>
+          <tr><td><code>behave --tags=smoke</code><br><code>pytest -m smoke</code></td><td>Solo los 4 escenarios del camino crítico</td><td>Para una verificación rápida</td></tr>
+          <tr><td><code>behave -n "Complete purchase"</code></td><td>Un escenario por nombre</td><td>Al trabajar sobre un escenario puntual</td></tr>
+          <tr><td><code>pytest -k "complete_purchase"</code></td><td>Un escenario por nombre, en snake_case</td><td>Idem, con pytest-bdd</td></tr>
+          <tr><td><code>behave features/login.feature</code><br><code>pytest tests/step_defs/test_login.py</code></td><td>Un feature completo</td><td>Al trabajar sobre un módulo</td></tr>
+          <tr><td><code>behave -D headed=true -D slowmo=500</code><br><code>pytest --headed --slowmo 500</code></td><td>Muestra el navegador y ralentiza cada acción</td><td>Para ver qué hace la prueba</td></tr>
+          <tr><td><code>behave -D browser=firefox</code><br><code>pytest --browser firefox</code></td><td>Otro navegador (requiere <code>playwright install firefox</code>)</td><td>Para probar compatibilidad</td></tr>
+          <tr><td><code>playwright show-trace &lt;ruta&gt;/trace.zip</code></td><td>Abre el visor de traces de Playwright</td><td>Para analizar una falla</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="margin-top:18px; color: var(--muted); font-size: 14px;">📚 Lista completa de opciones en el <code>README.md</code>. Valores por defecto en <code>behave.ini</code> y <code>pytest.ini</code>.</p>
+  </div>
+</section>
+
+<!-- ═════════════ 8. PRIMER CICLO ═════════════ -->
+<section id="empezar">
+  <div class="container">
+    <span class="kicker">08 · El primer paso</span>
+    <h2>El primer ciclo en 3 pasos</h2>
+    <p class="lead">El camino mínimo para clonar el proyecto y ver las dos suites en verde.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div>
+          <h3>Instalar dependencias</h3>
+          <p>Crear el entorno virtual, instalar las versiones fijadas en <code>requirements.txt</code> y
+            descargar Chromium para Playwright.</p>
+<pre class="cmd">python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+playwright install chromium</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div>
+          <h3>Crear el <code>.env</code></h3>
+          <p>Copiar la plantilla y completar <code>SAUCE_PASSWORD</code>. <code>SAUCE_BASE_URL</code> ya
+            viene con la URL del sitio. Si falta una variable, la ejecución se detiene con un mensaje que
+            indica cuál.</p>
+<pre class="cmd">copy .env.example .env</pre>
+        </div>
+      </div>
+      <div class="step">
+        <div>
+          <h3>Ejecutar las dos suites</h3>
+          <p>Cada una debe terminar con 17 escenarios aprobados.</p>
+<pre class="cmd">behave
+pytest</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>💡 Tip:</strong> para ver la prueba en acción la primera vez, ejecuta
+      <code>behave -n "Complete purchase" -D headed=true -D slowmo=500</code>. Verás el login, el
+      carrito y el checkout completos en el navegador.
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════ 9. ESTADO ═════════════ -->
+<section id="estado" class="alt">
+  <div class="container">
+    <span class="kicker">09 · El estado</span>
+    <h2>Qué está hecho y qué falta</h2>
+    <p class="lead">Última ejecución: 15 de octubre de 2026, en local, Chromium headless.</p>
+
+    <div class="tw">
+      <table>
+        <thead><tr><th>Capacidad</th><th>Estado</th><th>Detalle</th></tr></thead>
+        <tbody>
+          <tr><td>Suite behave</td><td><span class="badge">17/17 VERDE</span></td><td class="n">4 features · 17 escenarios · 73 steps · ≈8 s</td></tr>
+          <tr><td>Suite pytest-bdd</td><td><span class="badge">17/17 VERDE</span></td><td class="n">Los mismos 17 escenarios · ≈16 s</td></tr>
+          <tr><td>Evidencia ante fallas</td><td><span class="badge">LISTO</span></td><td>Screenshot y trace en los dos runners</td></tr>
+          <tr><td>Configuración por <code>.env</code></td><td><span class="badge">LISTO</span></td><td>URL y contraseña fuera del código</td></tr>
+          <tr><td>Otros navegadores</td><td><span class="badge wip">SIN PROBAR</span></td><td>Firefox y WebKit se pueden elegir por opción, pero no se han ejecutado</td></tr>
+          <tr><td>Integración continua</td><td><span class="badge no">NO EXISTE</span></td><td>No hay pipeline; las variables del <code>.env</code> tendrían que llegar como secrets</td></tr>
+          <tr><td>Reporte HTML</td><td><span class="badge no">NO EXISTE</span></td><td>Hoy el resultado es la consola más los artefactos de las fallas</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <strong>🔀 La decisión pendiente:</strong> elegir un runner para eliminar la duplicación de steps.
+      pytest-bdd requiere menos código de infraestructura porque pytest-playwright ya resuelve el navegador
+      y la evidencia. behave es más simple al escribir steps porque no distingue Given de When. Antes de
+      decidir conviene definir dónde va a correr en CI y qué formato de reporte necesita el equipo.
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════ 10. PROFUNDIZAR ═════════════ -->
+<section id="profundizar">
+  <div class="container">
+    <span class="kicker">10 · Para profundizar</span>
+    <h2>Dónde leer más</h2>
+    <p class="lead">Esta guía entrega el concepto. Para el detalle técnico, estos son los archivos clave
+      del repositorio:</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <span class="icon">📘</span>
+        <h3>README.md</h3>
+        <p>Instalación, configuración del <code>.env</code>, todos los comandos de los dos runners, la
+          estructura del proyecto y la cobertura por feature.</p>
+      </div>
+      <div class="card">
+        <span class="icon">🧭</span>
+        <h3>CLAUDE.md</h3>
+        <p>Arquitectura y convenciones fáciles de romper: steps duplicados, valores vacíos en
+          <code>Examples</code>, Given/When apilados, Page Objects nuevos.</p>
+      </div>
+      <div class="card">
+        <span class="icon">📋</span>
+        <h3>features/</h3>
+        <p>Los cuatro <code>.feature</code>. Son la mejor documentación funcional de lo que se prueba.</p>
+      </div>
+      <div class="card">
+        <span class="icon">⚙️</span>
+        <h3>behave.ini y pytest.ini</h3>
+        <p>Opciones por defecto de cada runner: navegador, modo headless, evidencia y markers registrados.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════ FOOTER ═════════════ -->
+<footer>
+  <div class="container">
+    <p style="font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-size: 16px; opacity: 0.92; margin-bottom: 14px;">«Un mismo Gherkin, dos runners: <strong style="color: var(--naranja-soft); font-style: normal;">la comparación es la prueba</strong>.»</p>
+    <p><strong>🎭 POC Playwright + pytest</strong> · <code>poc_plawright_pytest</code> · Octubre 2026</p>
+    <p style="margin-top: 8px; opacity: 0.85;">Playwright 1.64 + behave 1.3.3 + pytest-bdd 9.0.0 + pytest-playwright 0.10 · Python 3.13 · saucedemo.com</p>
+  </div>
+</footer>
