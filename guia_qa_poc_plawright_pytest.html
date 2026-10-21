@@ -506,7 +506,7 @@
         <p><strong>7 escenarios en 3 features.</strong> <code>QA0001_login_success</code>: login exitoso.
           <code>QA0002_login_errors</code>: QA_0002_01 a _05, usuario bloqueado, credenciales inválidas, usuario vacío, ambos vacíos y
           contraseña vacía. <code>QA0003_logout</code>: cerrar sesión.</p>
-        <p class="ex">Los 4 errores van en un Scenario Outline con <code>Examples</code>.</p>
+        <p class="ex">Los 5 errores van en un Scenario Outline, con un bloque <code>Examples</code> y un tag por caso.</p>
       </div>
       <div class="test-card api">
         <span class="badge">@inventory</span>
@@ -664,7 +664,7 @@
               <td>Se configura en <code>before_all</code></td>
               <td>Se configura en un fixture autouse de sesión</td></tr>
           <tr><td><strong>Ver el navegador</strong></td>
-              <td><code>-D headed=true -D slowmo=500</code></td>
+              <td>Visible por defecto (<code>headed = true</code> en <code>behave.ini</code>); <code>-D headed=false</code> para ocultarlo</td>
               <td><code>--headed --slowmo 500</code></td></tr>
           <tr><td><strong>Cambiar la URL</strong></td>
               <td><code>-D base_url=&lt;url&gt;</code></td>
@@ -672,6 +672,12 @@
           <tr><td><strong>Un Page Object nuevo</strong></td>
               <td>Se crea en <code>before_scenario</code></td>
               <td>Se agrega como fixture en <code>conftest.py</code></td></tr>
+          <tr><td><strong>Un caso por su ID</strong></td>
+              <td><code>--tags=@QA_0002_03</code></td>
+              <td><code>-m QA_0002_03</code> (los tags <code>@QA_*</code> se registran solos en <code>conftest.py</code>)</td></tr>
+          <tr><td><strong>Log de ejecución</strong></td>
+              <td>Uno por caso y por día en <code>test-results/logs/&lt;YYYYMMDD&gt;/</code></td>
+              <td>No tiene (solo la salida de pytest)</td></tr>
         </tbody>
       </table>
     </div>
@@ -749,13 +755,15 @@
       <table>
         <thead><tr><th>Comando</th><th>¿Para qué?</th><th>¿Cuándo lo uso?</th></tr></thead>
         <tbody>
-          <tr><td><code>behave</code></td><td>Ejecuta toda la suite con behave (headless, Chromium)</td><td>Después de cualquier cambio</td></tr>
+          <tr><td><code>behave</code></td><td>Ejecuta toda la suite con behave (Chromium, navegador visible)</td><td>Después de cualquier cambio</td></tr>
           <tr><td><code>pytest</code></td><td>Ejecuta toda la suite con pytest-bdd</td><td>Después de cualquier cambio, junto con <code>behave</code></td></tr>
           <tr><td><code>behave --tags=smoke</code><br><code>pytest -m smoke</code></td><td>Solo los 4 escenarios del camino crítico</td><td>Para una verificación rápida</td></tr>
           <tr><td><code>behave -n "Complete purchase"</code></td><td>Un escenario por nombre</td><td>Al trabajar sobre un escenario puntual</td></tr>
           <tr><td><code>pytest -k "complete_purchase"</code></td><td>Un escenario por nombre, en snake_case</td><td>Idem, con pytest-bdd</td></tr>
+          <tr><td><code>behave --tags=@QA_0002_03</code><br><code>pytest -m QA_0002_03</code></td><td>Un caso de prueba por su ID</td><td>Para reejecutar un caso del test plan</td></tr>
           <tr><td><code>behave features/QA0001_login_success.feature</code><br><code>pytest tests/step_defs/test_qa0001_login_success.py</code></td><td>Un feature completo</td><td>Al trabajar sobre un módulo</td></tr>
-          <tr><td><code>behave -D headed=true -D slowmo=500</code><br><code>pytest --headed --slowmo 500</code></td><td>Muestra el navegador y ralentiza cada acción</td><td>Para ver qué hace la prueba</td></tr>
+          <tr><td><code>behave -D slowmo=500</code><br><code>pytest --headed --slowmo 500</code></td><td>Muestra el navegador y ralentiza cada acción</td><td>Para ver qué hace la prueba</td></tr>
+          <tr><td><code>behave -D headed=false</code></td><td>Ejecuta behave sin ventana (más rápido)</td><td>En CI o para una corrida rápida</td></tr>
           <tr><td><code>behave -D browser=firefox</code><br><code>pytest --browser firefox</code></td><td>Otro navegador (requiere <code>playwright install firefox</code>)</td><td>Para probar compatibilidad</td></tr>
           <tr><td><code>playwright show-trace &lt;ruta&gt;/trace.zip</code></td><td>Abre el visor de traces de Playwright</td><td>Para analizar una falla</td></tr>
         </tbody>
@@ -806,7 +814,7 @@ pytest</pre>
 
     <div class="callout">
       <strong>💡 Tip:</strong> para ver la prueba en acción la primera vez, ejecuta
-      <code>behave -n "Complete purchase" -D headed=true -D slowmo=500</code>. Verás el login, el
+      <code>behave -n "Complete purchase" -D slowmo=500</code>. Verás el login, el
       carrito y el checkout completos en el navegador.
     </div>
   </div>
@@ -817,7 +825,7 @@ pytest</pre>
   <div class="container">
     <span class="kicker">09 · El estado</span>
     <h2>Qué está hecho y qué falta</h2>
-    <p class="lead">Última ejecución: 15 de octubre de 2026, en local, Chromium headless.</p>
+    <p class="lead">Última ejecución: 19 de octubre de 2026, en local, Chromium.</p>
 
     <div class="tw">
       <table>
@@ -827,6 +835,8 @@ pytest</pre>
           <tr><td>Suite pytest-bdd</td><td><span class="badge">18/18 VERDE</span></td><td class="n">Los mismos 18 escenarios · ≈16 s</td></tr>
           <tr><td>Evidencia ante fallas</td><td><span class="badge">LISTO</span></td><td>Screenshot y trace en los dos runners</td></tr>
           <tr><td>Configuración por <code>.env</code></td><td><span class="badge">LISTO</span></td><td>URL y contraseña fuera del código</td></tr>
+          <tr><td>Log de ejecución por caso</td><td><span class="badge">LISTO</span></td><td>behave: <code>test-results/logs/&lt;YYYYMMDD&gt;/</code> con [Setup], steps y resumen final</td></tr>
+          <tr><td>Diseño de features</td><td><span class="badge">LISTO</span></td><td>Cabecera Autor / JIRA / Precondiciones / Objetivo / Carpeta_Xray y tags <code>@QA_*</code> por caso</td></tr>
           <tr><td>Otros navegadores</td><td><span class="badge wip">SIN PROBAR</span></td><td>Firefox y WebKit se pueden elegir por opción, pero no se han ejecutado</td></tr>
           <tr><td>Integración continua</td><td><span class="badge no">NO EXISTE</span></td><td>No hay pipeline; las variables del <code>.env</code> tendrían que llegar como secrets</td></tr>
           <tr><td>Reporte HTML</td><td><span class="badge no">NO EXISTE</span></td><td>Hoy el resultado es la consola más los artefactos de las fallas</td></tr>
@@ -872,7 +882,7 @@ pytest</pre>
       <div class="card">
         <span class="icon">⚙️</span>
         <h3>behave.ini y pytest.ini</h3>
-        <p>Opciones por defecto de cada runner: navegador, modo headless, evidencia y markers registrados.</p>
+        <p>Opciones por defecto de cada runner: navegador, navegador visible u oculto, evidencia y markers registrados.</p>
       </div>
     </div>
   </div>

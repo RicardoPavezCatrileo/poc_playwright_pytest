@@ -8,17 +8,17 @@ POC de pruebas end-to-end BDD contra https://www.saucedemo.com usando Playwright
 
 ## Comandos
 
-Usar el intérprete del venv (`.venv/Scripts/python`); las dependencias están fijadas en `requirements.txt`.
+Usar el intérprete del venv (`.venv/Scripts/python`); las dependencias están fijadas en `requirements.txt`. Preparación inicial: `pip install -r requirements.txt`, `playwright install chromium` y copiar `.env.example` a `.env` completando `SAUCE_PASSWORD`.
 
 ```
-.venv/Scripts/behave                                    # suite completa con behave
-.venv/Scripts/python -m pytest                          # suite completa con pytest-bdd
+.venv/Scripts/behave                                    # suite completa con behave (navegador visible)
+.venv/Scripts/python -m pytest                          # suite completa con pytest-bdd (headless; --headed para verlo)
 .venv/Scripts/behave -n "Complete purchase"             # un escenario por nombre
 .venv/Scripts/behave -D headed=false                    # sin navegador visible (behave.ini trae headed = true)
 .venv/Scripts/python -m pytest -k "complete_purchase"   # un escenario (nombre del escenario en snake_case)
 ```
 
-Todo tag nuevo de Gherkin debe registrarse en `markers` dentro de `pytest.ini`.
+Todo tag nuevo de Gherkin debe registrarse en `markers` dentro de `pytest.ini`, salvo los tags de caso `@QA_*`, que `tests/conftest.py` registra solo leyendo los features.
 
 Ante una falla, behave guarda screenshot y trace en `test-results/behave/<escenario>/` y pytest en `test-results/pytest/` (pytest-playwright vacía su carpeta `--output` al iniciar; por eso no debe apuntar a `test-results/` o borra la evidencia de behave); se abre con `.venv/Scripts/playwright show-trace <ruta>/trace.zip`.
 
@@ -42,7 +42,8 @@ Lado pytest-bdd:
 Convenciones fáciles de romper:
 
 - El atributo test-id de Playwright está configurado como `data-test` (pytest: fixture autouse de sesión; behave: `before_all`), por eso los localizadores usan `page.get_by_test_id("<valor de data-test>")`. Preferirlo sobre CSS.
-- Cada `Scenario` / `Scenario Outline` empieza con un ID correlativo global: `QA_0001 Successful login ...`. Un escenario nuevo toma el siguiente número libre (buscar el mayor con `grep -o "QA_[0-9]*" features/*.feature`); los IDs no se reutilizan ni se renumeran. En un `Scenario Outline` cada fila es un caso propio: columna `case` (`01`, `02`…) en `Examples` y nombre `QA_NNNN_<case> ...` (ver `features/QA0002_login_errors.feature`). Los features nuevos se nombran `QANNNN_<nombre>.feature` con el ID de su escenario, y su módulo pytest `tests/step_defs/test_qannnn_<nombre>.py`. El ID queda en los nombres de pytest (`test_qa_0001_...`) y se filtra con `behave -n "QA_0001"` o `pytest -k qa_0001`.
+- Cada `Scenario` / `Scenario Outline` empieza con un ID correlativo global: `QA_0001 Successful login ...`. Un escenario nuevo toma el siguiente número libre (buscar el mayor con `grep -o "QA_[0-9]*" features/*.feature`); los IDs no se reutilizan ni se renumeran. En un `Scenario Outline` cada fila es un caso propio: un bloque `Examples` por fila con su tag `@QA_NNNN_<case>`, columna `case` (`01`, `02`…) y nombre `QA_NNNN_<case> ...` (ver `features/QA0002_login_errors.feature`). Los features nuevos se nombran `QANNNN_<nombre>.feature` con el ID de su escenario, y su módulo pytest `tests/step_defs/test_qannnn_<nombre>.py`. Un caso se ejecuta solo con `behave --tags=@QA_0002_03` o `pytest -m QA_0002_03`.
+- Diseño de cada `.feature` (copiar uno existente): cabecera de comentarios en español (`# Autor`, `# JIRA: <ID> <título>`, `# Precondiciones`, `# Objetivo` con los comandos para ejecutarlo, `# Funcionalidad_QA`, `# Carpeta_Xray`); tag de módulo sobre `Feature:` (`@login`, `@cart`…); sangría de 4 espacios; sobre cada escenario `@QA_NNNN @WEB [@smoke] @Regresion`.
 - `I am logged in as "<user>"` solo indica el usuario; el step toma la contraseña real de `settings.PASSWORD`, así que no ponerla en los features.
 - pytest-bdd distingue el tipo de step: un step usado después de `Given` en un `Background` y después de `When` en un escenario necesita `@given` y `@when` apilados sobre la misma función.
 - Cuando un valor de `Examples` puede venir vacío, usar `parsers.re` con `[^"]*` en vez de `parsers.parse` (`{x}` necesita al menos un carácter).

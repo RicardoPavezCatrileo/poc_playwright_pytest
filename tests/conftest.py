@@ -1,4 +1,7 @@
 """Fixtures y steps compartidos entre features."""
+import re
+from pathlib import Path
+
 import pytest
 from playwright.sync_api import expect
 from pytest_bdd import given, parsers, then, when
@@ -6,11 +9,19 @@ from pytest_bdd import given, parsers, then, when
 import settings
 from pages import CartPage, CheckoutPage, InventoryPage, LoginPage
 
+FEATURES_DIR = Path(__file__).resolve().parent.parent / "features"
+
 
 def pytest_configure(config):
     # La URL viene del .env; un --base-url en la línea de comandos tiene prioridad
     if not config.option.base_url:
         config.option.base_url = settings.BASE_URL
+    # Los tags de caso (@QA_0001, @QA_0002_01...) se registran solos leyendo los features
+    qa_tags = set()
+    for feature in FEATURES_DIR.glob("*.feature"):
+        qa_tags.update(re.findall(r"@(QA_\d+(?:_\d+)?)\b", feature.read_text(encoding="utf-8")))
+    for tag in sorted(qa_tags):
+        config.addinivalue_line("markers", f"{tag}: caso de prueba {tag}")
 
 
 @pytest.fixture(scope="session", autouse=True)

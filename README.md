@@ -31,6 +31,7 @@ behave                                   # todo (navegador visible, chromium)
 behave --tags=smoke                      # por tag (@smoke, @login, @cart, ...)
 behave features/QA0001_login_success.feature  # una feature
 behave -n "Complete purchase"            # un escenario por nombre
+behave --tags=@QA_0002_03                # un caso de prueba por su ID
 behave -D headed=false                   # sin ver el navegador (más rápido, para CI)
 behave -D slowmo=500                     # cámara lenta
 behave -D browser=firefox                # otro navegador (requiere playwright install firefox)
@@ -49,6 +50,7 @@ pytest --headed --slowmo 500             # ver el navegador
 pytest -m smoke                          # por tag de Gherkin (@smoke, @login, @cart, ...)
 pytest tests/step_defs/test_qa0001_login_success.py  # una feature
 pytest -k "complete_purchase"            # un escenario (nombre del escenario en snake_case)
+pytest -m QA_0002_03                     # un caso de prueba por su ID
 pytest --browser firefox                 # otro navegador (requiere playwright install firefox)
 ```
 

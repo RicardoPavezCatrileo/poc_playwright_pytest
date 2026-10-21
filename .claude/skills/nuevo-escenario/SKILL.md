@@ -15,9 +15,17 @@ solo está terminado cuando las dos suites pasan.
   (ej. `Scenario: QA_0010 Add product from detail page`). El número es correlativo global entre
   todos los features: tomar el mayor existente (`grep -o "QA_[0-9]*" features/*.feature`) y sumar 1.
   Nunca reutilizar ni renumerar un ID existente, aunque se borre o mueva el escenario.
-- **Scenario Outline:** cada fila es un caso con ID propio. Agregar la columna `case` (`01`, `02`…)
-  como primera columna de `Examples` y nombrar el outline `QA_NNNN_<case> ...`
-  (resultado: `QA_0002_01`, `QA_0002_02`…). Ejemplo: `features/QA0002_login_errors.feature`.
+- **Scenario Outline:** cada fila es un caso con ID propio. Un bloque `Examples` por fila, con su
+  tag `@QA_NNNN_<case>` encima, la columna `case` (`01`, `02`…) como primera columna, y el outline
+  nombrado `QA_NNNN_<case> ...` (resultado: `QA_0002_01`, `QA_0002_02`…).
+  Ejemplo: `features/QA0002_login_errors.feature`.
+- **Diseño del archivo** (copiar un feature existente como plantilla):
+  1. Cabecera de comentarios en español: `# Autor`, `# JIRA: <ID> <título>`, `# Precondiciones`,
+     `# Objetivo` (con los comandos behave/pytest para ejecutarlo), `# Funcionalidad_QA`, `# Carpeta_Xray`.
+  2. Tag de módulo sobre `Feature:` (`@login`, `@inventory`, `@cart`, `@checkout`).
+  3. Sangría de 4 espacios.
+  4. Sobre cada escenario: `@QA_NNNN @WEB @Regresion`, más `@smoke` si es camino crítico.
+- Los tags `@QA_*` no se registran a mano: `tests/conftest.py` los registra leyendo los features.
 - **Feature nuevo:** archivo `features/QANNNN_<nombre>.feature`, con el ID de su escenario, y módulo
   pytest `tests/step_defs/test_qannnn_<nombre>.py` (en minúscula).
 - Antes de escribir una frase nueva, buscar si ya existe un step que sirva:
